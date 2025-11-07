@@ -1,0 +1,42 @@
+# load python version
+module load python/3.11.0-icl
+
+# create a new environment
+#python3 -m venv bin/node2vec
+    
+# activate environment
+. /bin/node2vec/bin/activate
+
+# install tools
+#pip install -U node2vec pandas
+
+# launch python
+python3
+
+EMBEDDING_FILENAME= './HPO_id_no_Bcell_filtering_embeddings.emb'
+
+# get tools
+import pandas as pd
+import networkx as nx
+from node2vec import Node2Vec
+
+# import table of node
+df = pd.read_table("HPO_id_no_Bcell_filtering.tsv", header=None)
+# Each row will be processed as one edge instance
+G = nx.from_pandas_edgelist(df, source=0, target=1, create_using=nx.Graph())
+
+# Precompute probabilities and generate walks 
+# generate vector representations of nodes on a graph
+node2vec = Node2Vec(G, dimensions=128, walk_length=10, num_walks=80, workers=4)
+
+# Embed nodes
+# Creates the embeddings using gensim's Word2Vec (capturing the context of the HPO, how often it is associated with other HPOs in the onthology pathway)
+model = node2vec.fit(window=10, min_count=1, batch_words=4)
+
+# Save embeddings for later use
+model.wv.save_word2vec_format(EMBEDDING_FILENAME)
+
+
+#References:
+# https://github.com/eliorc/node2vec/blob/master/README.md
+# https://radimrehurek.com/gensim/models/word2vec.html
