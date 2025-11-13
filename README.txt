@@ -1,7 +1,12 @@
 Scripts used for HPO analyses:
 
-# For primary analyses:
+# Set up
+`common.R`: list all dependencies
+
+# Clean data:
 00-data_cleaning.R
+
+# For primary analyses:
 01-epidemiology_table.R
 02-analysis_training_data.R
 03-number_patients_per_category.R
@@ -13,7 +18,7 @@ Scripts used for HPO analyses:
 05.5-immuno_HPO_associations.R
 05.6-genetic_HPO_associations.R
 05.7-clusters_associations.R
-common.R
+
 
 # For manuscript figures and tables:
 Figure1.R
