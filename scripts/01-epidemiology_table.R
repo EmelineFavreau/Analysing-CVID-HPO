@@ -5,16 +5,25 @@ source("common.R")
 ### EPIDEMIOLOGY TABLE
 
 # load nbr
+# col: STUDY_ID,FAMILY_ID,CREATED,CENTRE,SEX,AFFECTED,AETIOLOGY_CONFIRMED,
+# AETIOLOGY_REPORT,VARIANTS,GENES,PHENOTYPES,	
+# abnormal_t_cell_proliferation_to_pha,age_of_onset_of_symptoms,	
+# b_cells_uL,baseline_or_pre_ig_replacement_igg_gL,cd21_low_b_cells_pct,
+# cd3_cells_uL,cd4_cells_uL,cd8_cells_uL,class_switched_b_cells_pct,
+# consanguinity,diagnosis,Diagnosis gene,family_history,Gene role confirmed,	
+# glild	iga_gL,ige_kUL,igm_gL,marginal_zone_b_cells_pct,memory_b_cells_pct,
+# naive_b_cells_pct,nk_cells_uL,normal_immunology_test_results,
+# on_ig_replacement,on_ig_replacement_igg_gL,	
+# on_immunosuppression_at_the_time_of_laboratory_testing,
+# other_immunology_test_results,other_information,paediatric_case,
+# plasmablasts_pct,transitional_b_cells_pct,year_of_birth,
+# BRIDGE,LAB,PACK,PLATEKEY,RNA_Z,SP,WGS,
+# Each row describes a participant with PCT entryhpo,
+# sequenced,Immuno_group,Genetic_variant
 nbr <- readRDS("../result/tidy_data")
 
-# number of participants 528
+# number of participants
 number_records <- nrow(nbr) 
-#number_records
-# save list of CVID patients
-#write.csv(nbr$STUDY_ID, "../result/CVID_patients.csv")
-
-# total number of patients 
-# 528 across 11 centers are CVID and have complete HPO phenotype annotation
 
 # name the focus phenotypes for the table
 hpo_names <- list(
@@ -64,18 +73,12 @@ for(i in 1:n_terms) {
   
 }
 
-# number of records without sex
+# number of records without sex or year of birth
 no_sex <- nbr$STUDY_ID[is.na(nbr$SEX)]
-#fwrite(as.data.frame(no_sex), "../result/STUDY_ID_no_sex.csv")
 no_sex_centre <- nbr[is.na(nbr$SEX), c("STUDY_ID","CENTRE")]
-#fwrite(no_sex_centre, "../result/STUDY_ID_Centre_no_sex.csv")
 num_no_sex_recorded <- length(no_sex)
-
-# number of records without age
 no_yob <- nbr$STUDY_ID[is.na(nbr$year_of_birth)]
-#fwrite(as.data.frame(no_yob), "../result/STUDY_ID_no_yob.csv")
 no_yob_centre <- nbr[is.na(nbr$year_of_birth), c("STUDY_ID","CENTRE")]
-#fwrite(no_yob_centre, "../result/STUDY_ID_Centre_no_yob.csv")
 num_no_yob_record <- sum(is.na(nbr$year_of_birth))
 
 # make the table
@@ -110,6 +113,3 @@ epidemiologic_data_table <- data.frame(
 
 # save table
 write.csv(epidemiologic_data_table, "../result/epidemiologic_data_table.csv")
-
-
-
