@@ -4,12 +4,12 @@ Scripts used for HPO analyses:
 `common.R`: list all dependencies
 
 # Clean data:
-00-data_cleaning.R
+00-data_cleaning.R: input lab values as HPO, exclude records that do not match analysis design
 
 # For primary analyses:
-01-epidemiology_table.R
-02-analysis_training_data.R
-03-number_patients_per_category.R
+01-epidemiology_table.R: count patients for age, sex, CVID presentations
+02-analysis_training_data.R: HPO similarity between training sets
+03-number_patients_per_category.R: count patients within subsets (B cell, immunoglobulin, genotype)
 04-clustering-patients.R
 05.1-matrix_design.R
 05.2-cluster_demographics.R
