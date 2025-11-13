@@ -2,25 +2,26 @@
 source("common.R")
 
 ######################## import input ##########################################
-# training data
+# training data: same patient, HPO codes by 10 different clinicians
 downloadname <- "../input/pheno-capture-data-all-2022-10-5.tsv"
 
 # make a dataframe from training data
 training <- read_tsv(downloadname)
-#2021-11-16 is RFH only, before Luiza added all the data
+
+# pre-training data: many patients with HPO codes by untrained clinicians
+#2021-11-16: only one centre
 t1 <- "../input/pheno-capture-data-2021-11-16.tsv"
 d1 <- read_tsv(t1)
 
-# before training but with RFH patients is 2022-9-26.
-# All data but RFH already edited by Luiza, so not a fair comparison
+# pre-training data: many patients with HPO codes by untrained clinicians
+# (except for d1's centre with trained clinicians)
 t2 <- "../input/pheno-capture-data-all-2022-9-26.tsv"
 d2 <- read_tsv(t2)
 
-# after training (June 2024)
+# post-training data: many patients with HPO codes by trained clinicians
 d3 <- readRDS("../result/tidy_data")
 
-
-######################## training #############################################
+######################## HPO Similarity HPO between training sets ##############
 # remove incomplete data
 training <- training[!is.na(training$HPO_CODE),]
 
@@ -41,10 +42,10 @@ patient1_hpolist <- training$HPO_CODE
 
 # vector of HPO codes
 all_hpo_vec <- unlist(strsplit(patient1_hpolist, split = "; "))
-#length(all_hpo_vec) 155
+
 # vector of unique HPO codes
 unique_hpo_vec <- unique(all_hpo_vec) 
-#length(unique_hpo_vec) 48
+
 
 # name of clinician in the rows training$ClinicianAnon
 # name of HPO in the columns unique_hpo_vec
@@ -67,16 +68,13 @@ for(c in 1:nrow(training)){
   }
 }
 
-
-
-
-# obtain HPO code from the name (list of 48 elements)
+# obtain HPO code from the name
 unique_hpo_names_vec <- lapply(unique_hpo_vec, 
            function(x) unname(hpo$name[which(hpo$id %in% x)]))
 
 # 2 columns: HPO names, HPO codes
 HPO_name_code <- cbind(unique_hpo_vec, unique_hpo_names_vec)
-#write.csv(HPO_name_code, "../result/training_HPO_name_code.csv")
+
 
 # frequency of each HPO
 HPO_df <- data.frame(HPO_code = unique_hpo_vec,
@@ -104,27 +102,13 @@ sim_mat <- get_sim_grid(ontology = hpo, term_sets = minimal_term_sets)
 # keep informative data
 sim_mat[lower.tri(sim_mat, diag = T)] <- NA
 
-# describe
-summary(sim_mat[!is.na(sim_mat)])
-#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#0.4595  0.6913  0.7954  0.7729  0.8565  0.8961 
-
 # row names have anonymised clinicians names
 rownames(sim_mat) <- 1:10
 
 fwrite(sim_mat, "../result/Fig1/sim_mat.csv")
 
 
-################################################################################
-
-# 2. Before/After comparison
-# Investigation of HPO term sets 
-# for same records for downloads of the PCT pre and after training
-
-
-
-
-
+######################## HPO Similarity HPO pre/post training ##################
 
 ##### task 1: combine two dataframes
 
@@ -140,13 +124,13 @@ before_training <- rbind(d1f, d2f)
 
 # remove NA
 before_training <- before_training[!is.na(before_training$HPO_CODE), ]
-#fwrite(before_training, "../result/before_training.csv")
+
 
 #### task 2: subset after training for the same study_id
 # keep "STUDY_ID" and "hpo"  
 d3f <- d3[d3$STUDY_ID %in% before_training$STUDY_ID, c("STUDY_ID", "hpo" )]
 
-# remove NA, n = 1718
+# remove NA
 after_training <- d3f[!is.na(d3f$hpo), ] 
 
 # for each study_id, calculate number of HPO before and after training
@@ -163,9 +147,7 @@ for(i in 1:nrow(after_training)){
   num_hpo_comp[i, 2:3] <- c(num_hpo_before, num_hpo_after)
 }
 
-
-
-# violin option
+#### task 3: plot distribution
 # transform out data into long
 num_hpo_compL <- pivot_longer(data = num_hpo_comp, 
                               cols = c("num_hpo_before" , "num_hpo_after" ),
@@ -186,26 +168,20 @@ fwrite(num_hpo_compL, "../result/Fig1/num_hpo_compL.csv")
 
 
 
-# Similarity analysis
+#### task 4: Similarity analysis
 # for a given patient, how similar are the hpo before and after?
 
-# step -2: subset to common STUDY_ID 
+# step 4.1: subset to common STUDY_ID 
 common_STUDY_ID_vec <- before_training$STUDY_ID[before_training$STUDY_ID %in%
                                                   after_training$STUDY_ID]
 
-
-# step -1: 
-# get terms set 
+# step 4.2: get terms set 
 term_sets <- list()
 for(i in 1:length(common_STUDY_ID_vec)){
-  
   p <- common_STUDY_ID_vec[i]
-  
   before_set <- strsplit(
     before_training$HPO_CODE[before_training$STUDY_ID == p], split = "; ")
-  
   after_set <-  after_training$hpo[after_training$STUDY_ID == p] # a list
-  
   term_sets <- c(term_sets,
                  before_set,
                  after_set)
@@ -224,13 +200,10 @@ names(term_sets) <- n
 
 # call minimal_set on each term set to guarantee the 
 # similarity expressions are faithfully evaluated
-# term_sets <- lapply(term_sets,
-#                     function(x) x[!is.na(x)])
-
 term_sets <- lapply(term_sets,
                     function(x) minimal_set(hpo, x))
 
-##### 2. Calculate similarity matrix
+# step 4.3: Calculate similarity matrix
 sim_mat <- get_sim_grid(ontology = hpo,
                         term_sets = term_sets)
 
@@ -251,27 +224,12 @@ for(i in 1:length(common_STUDY_ID_vec)){
 # give STUDY_ID as name of vector of similarity
 names(similarity_value_vec) <- common_STUDY_ID_vec
 
-#summary(similarity_value_vec)
-#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#0.1928  0.6869  0.8026  0.7792  0.9032  1.0000 
-
-
-# calculate difference of number of HPO before and after training 
+# step 4.4: calculate difference of number of HPO before and after training 
 num_hpo_comp$differential <- num_hpo_comp$num_hpo_after - 
   num_hpo_comp$num_hpo_before
 
 # combine results
 index <- match(num_hpo_comp$STUDY_ID, common_STUDY_ID_vec)
 num_hpo_comp$before_after_similarity_value <- similarity_value_vec[index]
-  
-# most patients gaining between (add number) and (add number) additional HPO terms post-training 
-summary(num_hpo_comp$differential[num_hpo_comp$differential>0])
 
 fwrite(num_hpo_comp, "../result/Fig1/num_hpo_comp.csv")
-
-
-# save the list of patients that had less HPO terms after training
-#patient_less_HPO_terms_after_training <- num_hpo_comp$STUDY_ID[num_hpo_comp$differential<0]
-#fwrite(as.data.frame(patient_less_HPO_terms_after_training), 
-#       "../result/patients_less_HPO_terms_after_training.csv")
-
