@@ -14,7 +14,7 @@ Scripts used for HPO analyses:
 05.1-matrix_design.R: create matrix with presence/absence of phenotype and genotype for all patients
 05.2-cluster_demographics.R: count infection/complex patients within subsets (B cell, immunoglobulin, genotype)
 05.3-Euroclass_demographics.R: count patients following Euroclass subsets
-05.4-Bcell_HPO_associations.R
+05.4-Bcell_HPO_associations.R: Cochran-Mantel-Haenszel tests for SmB/CD21/Tr level and each phenotype (HPO, GLILD, key HPO groups)
 05.5-immuno_HPO_associations.R
 05.6-genetic_HPO_associations.R
 05.7-clusters_associations.R
