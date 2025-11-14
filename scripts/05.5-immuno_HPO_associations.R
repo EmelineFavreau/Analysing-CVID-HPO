@@ -3,50 +3,37 @@ source("common.R")
 
 ######################## import input ##########################################
 
-patient_hpo_bio_mat <- readRDS("../result/patient_hpo_bio_mat.RDS")
+phbm <- readRDS("../result/patient_hpo_bio_mat.RDS")
 unique_codes <- readRDS("../result/unique_codes.RDS")
 
-hpo_vec <- rownames(patient_hpo_bio_mat)[grep("^HP",
-                                              rownames(patient_hpo_bio_mat))]
+hpo_vec <- rownames(phbm)[grep("^HP", rownames(phbm))]
 
-key_hpo_vec <- rownames(patient_hpo_bio_mat)[grep("^key",
-                                          rownames(patient_hpo_bio_mat))]
+key_hpo_vec <- rownames(phbm)[grep("^key", rownames(phbm))]
 
-####### Hypothesis B : association between immunoglobulin and phenotype ########
-# Hypothesis B underlying all those tests
-# Immunoglobulin groups and HPO are associated 
-# (controlling for within-centre variability)
-
-## Groups that fit the ESID CVID description or requested by clinician
-# 6 lowIgG-lowIgA-highIgM 
-# 57 lowIgG-lowIgA-normalIgM
-# 350 lowIgG-lowIgA-lowIgM   
-# 12 lowIgG-normalIgA-lowIgM
+######################## association tests #####################################
+# association between immunoglobulin and phenotype 
 
 # setting parameters
-biological_names <- c("lowIgGlowIgAhighIgM",
+bn <- c("lowIgGlowIgAhighIgM",
                       "lowIgGlowIgAnormalIgM", 
                       "lowIgGlowIgAlowIgM",
                       "lowIgGnormalIgAlowIgM")
 
-biological_cat <- c("llh",
-                    "lln",
-                    "lll",
-                    "lnl")
+bc <- c("llh", "lln", "lll", "lnl")
 
-names(biological_cat) <- biological_names
+names(bc) <- bn
 
 
 # result p values list
-pvalue_immuno_result_list <- list()
-contingency_immuno_result_list <- list()
-summary_contingency_immuno_result_list <- list()
+p_list <- list()
+c_list <- list()
+s_list <- list()
 
 # looping through biological categories
-for(k in 1:length(biological_names)){
-  # for GLILD:
-  focus_name <- biological_names[k]
-  focus_cat <- biological_cat[names(biological_cat) == focus_name]
+for(k in 1:length(bn)){
+  ####### for GLILD ##########
+  fn <- bn[k]
+  fc <- bc[names(bc) == fn]
   
   # initiate matrix
   mat_long <- matrix(data = 0,
@@ -54,25 +41,25 @@ for(k in 1:length(biological_names)){
   
   # loop through the centres
   for(c in names(centres_vec)){
-    # loop through the glild
+    # loop through glild
     for(g in c("reported_glild", "reported_no_glild")){
       # collect the categories
-      i <- c(focus_cat, g, c) 
+      i <- c(fc, g, c) 
       # subset the data to those categories
-      id <- patient_hpo_bio_mat[row.names(patient_hpo_bio_mat) %in% i, ]
+      id <- phbm[row.names(phbm) %in% i, ]
       # count the number of patients in the immuno groups
       s <- sum(colSums(id) == 3) 
       mat_long <- rbind(mat_long, c(i, s))
       # count the number of patients not in the immuno group
       s1 <- sum(id[g, ] == 1 &
                   id[c, ] == 1 &
-                  id[focus_cat, ] == 0)
+                  id[fc, ] == 0)
       mat_long <- rbind(mat_long,
-                        c(paste("no", focus_name, sep =""),
+                        c(paste("no", fn, sep =""),
                           i[2:3],
                           s1))
     }
-  } # end of loop centre
+  } 
   
   # remove rows with 0
   mat_long <- mat_long[rowSums(mat_long != 0) > 0, ]
@@ -85,32 +72,32 @@ for(k in 1:length(biological_names)){
   }
   
   # name the columns
-  colnames(mat_long) <- c(focus_name, "phenotype", "centre", "count")
+  colnames(mat_long) <- c(fn, "phenotype", "centre", "count")
   
   # make it into a dataframe
   mat_long <- as.data.frame(mat_long)
   mat_long$count <- as.integer(mat_long$count)
   
   # make a three-dimensional table
-  contingency_table <- xtabs(
-    as.formula(paste("count ~ phenotype +", focus_name, "+ centre")),
+  ctw <- xtabs(
+    as.formula(paste("count ~ phenotype +", fn, "+ centre")),
     data = mat_long
   )
-  contingency_table1 <- xtabs(
-    as.formula(paste("count ~ phenotype +", focus_name)),
+  ctwo <- xtabs(
+    as.formula(paste("count ~ phenotype +", fn)),
     data = mat_long
   )
   
   
   # test for association, save p value
-  glild_result <- mantelhaen.test(contingency_table)
+  glild_result <- mantelhaen.test(ctw)
   pvec <- glild_result$p.value
-  thisname <- paste(focus_name, "_glild", sep = "")
+  thisname <- paste(fn, "_glild", sep = "")
   names(pvec) <- thisname
-  contingency_immuno_result_list[[thisname]] <- contingency_table
-  summary_contingency_immuno_result_list[[thisname]] <- contingency_table1
+  c_list[[thisname]] <- ctw
+  s_list[[thisname]] <- ctwo
   
-  # for each HPO:
+  ####### for HPO ##########
   for(h in 1:length(hpo_vec)){
     # get the HPO code
     g <- hpo_vec[h]
@@ -122,15 +109,15 @@ for(k in 1:length(biological_names)){
     # loop through the centres
     for(c in names(centres_vec)){
       # collect the categories
-      i <- c(focus_cat, g, c) 
+      i <- c(fc, g, c) 
       
       # subset the data to those categories
-      id <- patient_hpo_bio_mat[row.names(patient_hpo_bio_mat) %in% i, ]
+      id <- phbm[row.names(phbm) %in% i, ]
       
       # count the number of patients with the immunogroup and the HPO
       s <- sum(colSums(id) == 3) 
       if(is.integer(s)){
-        mat_long <- rbind(mat_long, c(focus_name,
+        mat_long <- rbind(mat_long, c(fn,
                                       paste(g, 1, sep = "_"),
                                       c,
                                       s))
@@ -141,7 +128,7 @@ for(k in 1:length(biological_names)){
       # count the number of patients without the immunogroup but the HPO
       s1 <- sum(id[c, ] == 1 &
                   id[g, ] == 1 &
-                  id[focus_cat, ] == 0)
+                  id[fc, ] == 0)
       if(is.integer(s1)){
         mat_long <- rbind(mat_long,
                           c(paste("no", i[1], sep =""),
@@ -154,10 +141,10 @@ for(k in 1:length(biological_names)){
       
       # count the number of patients with the immunogroup but not the HPO
       s2 <- sum(id[g, ] == 0 &
-                  id[focus_cat, ] == 1 &
+                  id[fc, ] == 1 &
                   id[c, ] == 1)
       if(is.integer(s2)){
-        mat_long <- rbind(mat_long, c(focus_name,
+        mat_long <- rbind(mat_long, c(fn,
                                       paste(g, 0, sep = "_"),
                                       c,
                                       s2))
@@ -168,7 +155,7 @@ for(k in 1:length(biological_names)){
       # count the number of patients not in immunogroup and without the HPO
       s3 <- sum(id[g, ] == 0 &
                   id[c, ] == 1 &
-                  id[focus_cat, ] == 0)
+                  id[fc, ] == 0)
       if(is.integer(s1)){
         mat_long <- rbind(mat_long,
                           c(paste("no", i[1], sep =""),
@@ -200,7 +187,7 @@ for(k in 1:length(biological_names)){
     }
     
     # name the columns
-    colnames(mat_long) <- c(focus_name, "phenotype", "centre", "count")
+    colnames(mat_long) <- c(fn, "phenotype", "centre", "count")
     
     # make it into a dataframe
     mat_long <- as.data.frame(mat_long)
@@ -209,34 +196,33 @@ for(k in 1:length(biological_names)){
     #if the mat_long has only one centre, ignore it
     if(nrow(mat_long) > 4){
       # make a three-dimensional table
-      hpo_contingency_table <- xtabs(
-        as.formula(paste("count ~ phenotype +", focus_name, "+ centre")),
+      hpo_ctw <- xtabs(
+        as.formula(paste("count ~ phenotype +", fn, "+ centre")),
         data = mat_long
       )
       
       # make a summary table
-      hpo_contingency_table1 <- xtabs(
-        as.formula(paste("count ~ phenotype +", focus_name)),
+      hpo_ctwo <- xtabs(
+        as.formula(paste("count ~ phenotype +", fn)),
         data = mat_long
       )
       
       # test for association
-      hpo_result <- mantelhaen.test(hpo_contingency_table)
+      hpo_result <- mantelhaen.test(hpo_ctw)
       cmh_p <- hpo_result$p.value
-      thisname <- paste(focus_name, g, sep = "_")
+      thisname <- paste(fn, g, sep = "_")
       names(cmh_p) <- thisname
       # combine p vec of all immuno tests (glild and HPOs)
       pvec <- c(pvec, cmh_p)
       # save the contingency table
-      contingency_immuno_result_list[[thisname]] <- hpo_contingency_table
+      c_list[[thisname]] <- hpo_ctw
       # save the summary contingency table
-      summary_contingency_immuno_result_list[[thisname]] <-
-        hpo_contingency_table1
-    } # end of if nrow(mat_long) > 4
-  } # end of individual HPO loop
+      s_list[[thisname]] <-
+        hpo_ctwo
+    } 
+  } 
   
-  ### start key HPO
-  # for each key hpo group:
+  ####### for KEY HPO group ##########
   for(z in 1:length(key_hpo_vec)){
     # select key group
     g <- key_hpo_vec[z]
@@ -247,15 +233,15 @@ for(k in 1:length(biological_names)){
     # loop through the centres
     for(c in names(centres_vec)){
       # collect the categories
-      i <- c(focus_cat, g, c) 
+      i <- c(fc, g, c) 
       
       # subset the data to those categories
-      id <- patient_hpo_bio_mat[row.names(patient_hpo_bio_mat) %in% i, ]
+      id <- phbm[row.names(phbm) %in% i, ]
       
       # count the number of patients with the immunogroup and the HPO
       s <- sum(colSums(id) == 3) 
       if(is.integer(s)){
-        mat_long <- rbind(mat_long, c(focus_name,
+        mat_long <- rbind(mat_long, c(fn,
                                       paste(g, 1, sep = "_"),
                                       c,
                                       s))
@@ -266,7 +252,7 @@ for(k in 1:length(biological_names)){
       # count the number of patients without the immunogroup but the HPO
       s1 <- sum(id[c, ] == 1 &
                   id[g, ] == 1 &
-                  id[focus_cat, ] == 0)
+                  id[fc, ] == 0)
       if(is.integer(s1)){
         mat_long <- rbind(mat_long,
                           c(paste("no", i[1], sep =""),
@@ -279,10 +265,10 @@ for(k in 1:length(biological_names)){
       
       # count the number of patients with the immunogroup but not the HPO
       s2 <- sum(id[g, ] == 0 &
-                  id[focus_cat, ] == 1 &
+                  id[fc, ] == 1 &
                   id[c, ] == 1)
       if(is.integer(s2)){
-        mat_long <- rbind(mat_long, c(focus_name,
+        mat_long <- rbind(mat_long, c(fn,
                                       paste(g, 0, sep = "_"),
                                       c,
                                       s2))
@@ -293,7 +279,7 @@ for(k in 1:length(biological_names)){
       # count the number of patients not in immunogroup and without the HPO
       s3 <- sum(id[g, ] == 0 &
                   id[c, ] == 1 &
-                  id[focus_cat, ] == 0)
+                  id[fc, ] == 0)
       if(is.integer(s1)){
         mat_long <- rbind(mat_long,
                           c(paste("no", i[1], sep =""),
@@ -305,7 +291,7 @@ for(k in 1:length(biological_names)){
       }
       
       
-    } # end of centre loop
+    } 
     
     # remove rows with 0
     mat_long <- mat_long[rowSums(mat_long != 0) > 0, ]
@@ -326,7 +312,7 @@ for(k in 1:length(biological_names)){
     }
     
     # name the columns
-    colnames(mat_long) <- c(focus_name, "phenotype", "centre", "count")
+    colnames(mat_long) <- c(fn, "phenotype", "centre", "count")
     
     # make it into a dataframe
     mat_long <- as.data.frame(mat_long)
@@ -334,45 +320,45 @@ for(k in 1:length(biological_names)){
     
     if(nrow(mat_long) > 4){
       # make a three-dimensional table
-      hpo_contingency_table <- xtabs(
-        as.formula(paste("count ~ phenotype +", focus_name, "+ centre")),
+      hpo_ctw <- xtabs(
+        as.formula(paste("count ~ phenotype +", fn, "+ centre")),
         data = mat_long
       )
       
       # make a summary table
-      hpo_contingency_table1 <- xtabs(
-        as.formula(paste("count ~ phenotype +", focus_name)),
+      hpo_ctwo <- xtabs(
+        as.formula(paste("count ~ phenotype +", fn)),
         data = mat_long
       )
       
       # keep only centres with hpo present in the phenotype
-      keep_centres <- names(colSums(hpo_contingency_table)[1,] ==
-                              0)[colSums(hpo_contingency_table)[1,] != 0]
+      keep_centres <- names(colSums(hpo_ctw)[1,] ==
+                              0)[colSums(hpo_ctw)[1,] != 0]
       
       
       # test for association
-      hpo_result <- mantelhaen.test(hpo_contingency_table)
+      hpo_result <- mantelhaen.test(hpo_ctw)
       cmh_p <- hpo_result$p.value
-      thisname <- paste(focus_name, g, sep = "_")
+      thisname <- paste(fn, g, sep = "_")
       names(cmh_p) <- thisname
       # combine p vec of all immuno tests (glild and HPOs)
       pvec <- c(pvec, cmh_p)
       # save the contingency table
-      contingency_immuno_result_list[[thisname]] <- hpo_contingency_table
+      c_list[[thisname]] <- hpo_ctw
       # save the summary contingency table
-      summary_contingency_immuno_result_list[[thisname]] <-
-        hpo_contingency_table1
+      s_list[[thisname]] <-
+        hpo_ctwo
       ### end key HPO
-    } # end of if mat_long > 4
+    } 
   } 
   
   # some results are NaN, because the contingency tables are so imbalanced
-  pvalue_immuno_result_list[[k]] <- pvec[!is.nan(pvec)]
-  names(pvalue_immuno_result_list)[k] <- focus_name
+  p_list[[k]] <- pvec[!is.nan(pvec)]
+  names(p_list)[k] <- fn
 }
 
 # adjustment for multiple comparison Benjamini and Hochberg
-BH_immuno_pvalue_result <- p.adjust(unlist(pvalue_immuno_result_list),
+BH_immuno_pvalue_result <- p.adjust(unlist(p_list),
                                     method = "BH")
 biological_measure <- gsub("\\..*$",
                names(BH_immuno_pvalue_result[BH_immuno_pvalue_result < 0.05]),
@@ -393,7 +379,7 @@ BH_immuno_CHM_table <- data.frame(
   phenotype_name,
   BH_adjust_pvalue)
 
-# human friendly p value. 
+# human friendly p value 
 BH_immuno_CHM_table$BH_adjust_pvalue <- 
   formatC(BH_immuno_CHM_table$BH_adjust_pvalue, format = "g")
 
@@ -405,7 +391,7 @@ fwrite(BH_immuno_CHM_table , "../result/Immuno_HPO_tests.csv")
 # qualify result
 c1 <- matrix(NA, ncol = 3)
 df <- BH_immuno_CHM_table
-rl <- summary_contingency_immuno_result_list
+rl <- s_list
 for(i in 1:nrow(df)){
   thisname <- paste(df[i, 1],
                     df[i, 2], sep = "_")
@@ -430,17 +416,14 @@ result <- c1 %>%
   
   # summarise the data for each group: sum of patients with HPO, 
   # sum of patients in the group
-  summarise(
-    patients_with_hpo = 
+  summarise(patients_with_hpo = 
       sum(patient_count[str_ends(HPO_presence1_absence0, "1")]),
     total_patients_in_group = sum(patient_count),
-    .groups = 'drop'
-  ) %>%
+    .groups = 'drop') %>%
   
   # get the percentage based on the group totals
   mutate(
-    percentage_with_hpo = (patients_with_hpo / total_patients_in_group) * 100
-  ) 
+    percentage_with_hpo = (patients_with_hpo / total_patients_in_group) * 100) 
 
 # change short names
 result$phenotype[result$phenotype == "nolll"] <- "NOT_lowIgGlowIgAlowIgM"
