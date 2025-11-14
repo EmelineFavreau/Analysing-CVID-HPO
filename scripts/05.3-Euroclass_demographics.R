@@ -3,24 +3,18 @@ source("common.R")
 
 ######################## import input ##########################################
 
-patient_hpo_bio_mat <- readRDS("../result/patient_hpo_bio_mat.RDS")
+phbm <- readRDS("../result/patient_hpo_bio_mat.RDS")
 
 
 ####### EUROClass groups Demographics ########################################
-# Following the EUROCLASS decision tree from the paper
-
-# If subsets of B cells ( CD21low, smB and transitional ) are present, 
-# then the patient has more than 1% of total B cells
-# if there is a row of 0, 
-# this means patients have less than 1% and  are not included
+# patient subsets with B cells  present, 
 i <- c("smb_normal", "smb_minus",
-       "cd21_low", "cd21_plus", # cd21_low >10, cd21_plus < 10
+       "cd21_low", "cd21_plus",
        "tr_norm", "tr_high" )
-t <- patient_hpo_bio_mat[row.names(patient_hpo_bio_mat) %in% i,]
+t <- phbm[row.names(phbm) %in% i,]
 t <- t[,colSums(t) != 0]
 
-# it is imperative to have a measure for smb; 
-# if not the data are excluded from this analysis
+# EUROClass filter
 tt <- t[,t[rownames(t) %in% c("smb_minus",  "smb_normal" ), ] %>%
           colSums(.) == 1]
 
