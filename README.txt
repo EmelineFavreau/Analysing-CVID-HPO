@@ -10,7 +10,7 @@ Scripts used for HPO analyses:
 01-epidemiology_table.R: count patients for age, sex, CVID presentations
 02-analysis_training_data.R: HPO similarity between training sets
 03-number_patients_per_category.R: count patients within subsets (B cell, immunoglobulin, genotype)
-04-clustering-patients.R
+04-clustering-patients.R: using key HPO terms, cluster patients as infectionBronchiectasis or complex
 05.1-matrix_design.R
 05.2-cluster_demographics.R
 05.3-Euroclass_demographics.R
