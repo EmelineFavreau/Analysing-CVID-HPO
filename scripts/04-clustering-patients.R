@@ -81,7 +81,7 @@ keys=list(infection = as.vector(unname(hpo$name[names(hpo$name) %in%
           # Hematological neoplasm [HP:0004377>=]
           lymphoproliferation=as.vector(unname(hpo$name[names(hpo$name) %in% 
                             c("HP:0011956", 
-                              "HP:0002716", 
+                              get_descendants(ontology = hpo, "HP:0002716"),
                               get_descendants(ontology = hpo, "HP:0004377"))])), 
           
           # Autoimmunity
