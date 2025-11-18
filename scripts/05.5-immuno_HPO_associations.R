@@ -2,12 +2,16 @@
 source("common.R")
 
 ######################## import input ##########################################
-
+# presence/absence matrix
 phbm <- readRDS("../result/patient_hpo_bio_mat.RDS")
+
+# HPO codes
 unique_codes <- readRDS("../result/unique_codes.RDS")
 
+# present HPO codes
 hpo_vec <- rownames(phbm)[grep("^HP", rownames(phbm))]
 
+# present key HPO codes
 key_hpo_vec <- rownames(phbm)[grep("^key", rownames(phbm))]
 
 ######################## association tests #####################################

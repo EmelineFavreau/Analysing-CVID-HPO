@@ -1,7 +1,7 @@
 Scripts used for HPO analyses:
 
 # Set up
-`common.R`: list all dependencies
+common.R: list all dependencies
 
 # Clean data:
 00-data_cleaning.R: input lab values as HPO, exclude records that do not match analysis design

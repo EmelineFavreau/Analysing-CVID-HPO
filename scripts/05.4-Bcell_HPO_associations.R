@@ -2,7 +2,7 @@
 source("common.R")
 
 ######################## import input ##########################################
-# presence/absence matirx
+# presence/absence matrix
 phbm <- readRDS("../result/patient_hpo_bio_mat.RDS")
 
 # HPO codes
