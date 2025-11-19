@@ -13,7 +13,6 @@ euroclass_patient_count_df <- fread("../input/Wehr_al_2028_patient_count.csv")
 
 ############# prep ############################################################
 
-
 data$study <- "INTREPID"
 
 data <- data %>% 
@@ -63,9 +62,6 @@ for(bl in euroclass_markers){
             study = "INTREPID",
             biological_measure = bl)
 }
-
-
-
 
 
 ############# Fig2 ############################################################
@@ -135,22 +131,42 @@ Fig2Bplot_data <- data %>%
       "smB-CD21\nINTREPID", "smB-CD21\nEUROClass",
       "smB-Tr\nINTREPID", "smB-Tr\nEUROClass")))
 
-
-stats_summary <- Fig2Bplot_data %>%
-  group_by(Bcell_group) %>%
+smBTrpv <- Fig2Bplot_data %>%
+  dplyr::filter(Bcell_group == "smB-Tr") %>%
   summarise(
     p_value = {ct <- xtabs(number_of_patients ~ study + biological_level,
-                  data = .)
-      chisq.test(ct)$p.value},
-    .groups = 'drop') %>%
-  mutate(y.position = c(95, 91, 146),
-    xmin = c("smB+CD21\nINTREPID",
-             "smB-CD21\nINTREPID",
-             "smB-Tr\nINTREPID"),
-    xmax = c("smB+CD21\nEUROClass",
-             "smB-CD21\nEUROClass",
-             "smB-Tr\nEUROClass"),
-    label = paste("\u03C7\u00B2 test, p =", round(p_value, digits = 3)))
+                           data = .)
+    chisq.test(ct)$p.value}) %>% as.numeric()
+
+smBCD21pv <-Fig2Bplot_data %>%
+  dplyr::filter(Bcell_group == "smB-CD21") %>%
+  summarise(
+    p_value = {ct <- xtabs(number_of_patients ~ study + biological_level,
+                           data = .)
+    chisq.test(ct)$p.value})%>% as.numeric()
+
+smBpCD21pv <-Fig2Bplot_data %>%
+  dplyr::filter(Bcell_group == "smB+CD21") %>%
+  summarise(
+    p_value = {ct <- xtabs(number_of_patients ~ study + biological_level,
+                           data = .)
+    chisq.test(ct)$p.value})%>% as.numeric()
+
+
+stats_summary <- tibble(Bcell_group=c("smB+CD21", "smB-CD21","smB-Tr"),  
+                        p_value= c(smBpCD21pv,smBCD21pv,smBTrpv),
+                        y.position=c(95, 91, 146),
+                        xmin = c("smB+CD21\nINTREPID",
+                                 "smB-CD21\nINTREPID",
+                                 "smB-Tr\nINTREPID"),
+                        xmax = c("smB+CD21\nEUROClass",
+                                 "smB-CD21\nEUROClass",
+                                 "smB-Tr\nEUROClass"),
+                        label = paste("\u03C7\u00B2 test, p =",
+                                      round(p_value, digits = 3)))
+  
+  
+
 
 all_colors <- c("smB+CD21lo"   = smBPLUSCD21col[1],
   "smB+CD21norm" = smBPLUSCD21col[2],
@@ -217,4 +233,6 @@ ggsave("../result/Fig2/Fig2.jpeg",
        height = 15,
        units = "cm")
 
-
+############# Legend details ###################################################
+#c hsqr
+stats_summary$Bcell_group[stats_summary$p_value<0.05]
