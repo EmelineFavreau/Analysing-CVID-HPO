@@ -14,14 +14,14 @@ infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
 complex_cluster <- fread("../result/complexPatients.csv")
 
 ############# Fig3 ############################################################
-# keep infection/complex patients (528 patients)
+# keep infection/complex patients
 data <- nbr %>% 
   dplyr::filter(STUDY_ID %in% c(infection_cluster$infectionBronchiectasis, 
                                complex_cluster$complexPatients)) 
 
 loc25 <- loc %>% dplyr::filter(HPO_freq > 25)
 
-# keep 65 HPO categorised as lab or clinical, each term in 25 or more patients
+# keep HPO categorised as lab or clinical, each term in 25 or more patients
 data$hpo <- sapply(data$hpo, function(x) x[x %in% loc25$HPO_code])
 
 data$hpo_long <- sapply(data$hpo,
@@ -126,20 +126,15 @@ Fig3 <- p_main + p_right +
   plot_layout(widths = c(3, 1))
 
 
-# 528 patients categorised as InfectionBronchiectasis or Complex
-# 65 HPO terms (appearing more than 25 times in our dataset), 
-# ordered by patient count
-# colour-coded Presence or absence of the HPO in the patient
-
-
 ############# Layout ###########################################################
-
-
-
 Fig3
 ggsave("../result/Fig3/Fig3.jpeg",
         width = 25,
         height = 20,
         units = "cm")
 
-
+############# Legend details ###################################################
+# number of patients
+nrow(data)
+# number of HPO
+length(HPO_order)

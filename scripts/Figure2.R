@@ -234,5 +234,5 @@ ggsave("../result/Fig2/Fig2.jpeg",
        units = "cm")
 
 ############# Legend details ###################################################
-#c hsqr
+#chsqr
 stats_summary$Bcell_group[stats_summary$p_value<0.05]
