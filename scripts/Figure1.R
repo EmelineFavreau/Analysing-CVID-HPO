@@ -38,7 +38,7 @@ Fig1A <- ggplot(df, aes(x = x,
         panel.grid = element_blank(),
         axis.ticks = element_blank(),
         axis.text.y = element_text(angle = 0, hjust = 1.5),
-        legend.position = c(0.95, 0.05),  # Position legend at the bottom-right
+        legend.position.inside = c(0.95, 0.05),  # Position legend at the bottom-right
         legend.justification = c("right", "bottom")) +
   labs(x = NULL, y = NULL,
        fill = "Semantic Similarity")
@@ -52,7 +52,8 @@ Fig1A <- ggplot(df, aes(x = x,
 num_hpo_compL$Timepoint <- ifelse(num_hpo_compL$Timepoint == "before",
                                   "Pre-Training",
                                   "Post-Training")
-Fig1B <- ggplot(num_hpo_compL, aes(x = Timepoint, y = Records, fill = Timepoint)) +
+Fig1B <- ggplot(num_hpo_compL,
+                aes(x = Timepoint, y = Records, fill = Timepoint)) +
   geom_violin(alpha = 0.5, trim = FALSE) +  
   geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +  
   labs(
@@ -81,7 +82,7 @@ Fig1C <- ggplot(num_hpo_comp,
   geom_density_2d_filled(alpha = 0.5) +
   scale_x_continuous(breaks = c(0.25, 0.5, 0.75, 1),
                      limits = c(0.2, 1.1)) + 
-  ylim(c(-20, 33)) + theme(legend.position="none")
+  ylim(c(-20, 33)) + theme(legend.position = "none")
 
 
 ############# Layout ###########################################################
@@ -99,3 +100,6 @@ ggsave("../result/Fig1/Fig1.jpeg",
        height = 20,
        units = "cm")
 
+############# Legend details ###################################################
+summary(num_hpo_compL$Records[num_hpo_compL$Timepoint == "Post-Training"])
+IQR(num_hpo_compL$Records[num_hpo_compL$Timepoint == "Post-Training"])
