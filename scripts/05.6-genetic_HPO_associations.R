@@ -358,9 +358,6 @@ BH_genetic_CHM_table$BH_adjust_pvalue <-
   formatC(BH_genetic_CHM_table$BH_adjust_pvalue,
           format = "g")
 
-# save table
-fwrite(BH_genetic_CHM_table , "../result/genetic_HPO_tests.csv")
-
 # qualify result
 c1 <- matrix(NA, ncol = 3)
 df <- BH_genetic_CHM_table
@@ -399,5 +396,9 @@ result <- c1 %>%
   ) 
 
 
-fwrite(result,
-       "../result/genetic_HPO_tests_summary_contingency_with_ratio.csv")
+# merge info
+merged_tibble <- result %>%
+  full_join(BH_genetic_CHM_table, by = c("HPO_code" = "phenotype_code"))
+
+############## save all
+fwrite(merged_tibble, "../result/genetic_HPO_tests_ratio_pvalue.csv")
