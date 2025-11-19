@@ -10,8 +10,10 @@ unique_codes <- readRDS("../result/unique_codes.RDS")
 
 ######################## association tests #####################################
 # association between B cell and phenotype 
-# a measure of B cell and HPO are associated, controlling for within-centre variability
-# Cochran-Mantel-Haenszel test for SmB/CD21/Tr level and each phenotype (HPO, GLILD)
+# a measure of B cell and HPO are associated, 
+# controlling for within-centre variability
+# Cochran-Mantel-Haenszel test for SmB/CD21/Tr level and
+# each phenotype (HPO, GLILD)
 
 hpo_vec <- rownames(phbm)[grep("^HP", rownames(phbm))]
 
@@ -292,8 +294,7 @@ BH_Bcell_CHM_table$BH_adjust_pvalue <-
   formatC(BH_Bcell_CHM_table$BH_adjust_pvalue,
           format = "g")
 
-# save table
-fwrite(BH_Bcell_CHM_table, "../result/B_cell_HPO_tests.csv")
+
 
 # qualify result
 c1 <- matrix(NA, ncol = 3)
@@ -329,5 +330,10 @@ result <- c1 %>%
   mutate(percentage_with_hpo = 
            (patients_with_hpo / total_patients_in_group) * 100) 
 
-fwrite(result,
-       "../result/B_cell_HPO_tests_summary_contingency_with_ratio.csv")
+# merge info
+merged_tibble <- result %>%
+  full_join(BH_Bcell_CHM_table, by = c("HPO_code" = "phenotype_code"))
+
+############## save all
+fwrite(merged_tibble, "../result/B_cell_HPO_tests_ratio_pvalue.csv")
+
