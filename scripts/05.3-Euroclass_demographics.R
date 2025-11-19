@@ -48,5 +48,5 @@ euroclass_STUDYID_df <- as.data.frame(rbind(
 # update colnames
 colnames(euroclass_STUDYID_df) <- c("euroclass_group", "STUDY_ID")
 
-# save the table
+############## save all
 fwrite(euroclass_STUDYID_df, "../result/euroclass_STUDYID.csv")
