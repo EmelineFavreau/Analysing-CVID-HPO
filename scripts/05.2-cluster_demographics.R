@@ -14,7 +14,7 @@ complex_cluster <- fread("../result/complexPatients.csv")
 
 # count the number of patients
 mat_long <- matrix(data = 0, ncol = 3)
-for (cl in c("infection_cluster", "complex_cluster" )){
+for (cl in c("infection_cluster", "complex_cluster")){
   for (bio in c("smb_normal", "smb_minus",
                 "cd21_low", "cd21_plus",
                 "tr_norm","tr_high",
@@ -51,9 +51,6 @@ for (cl in c("infection_cluster","complex_cluster" )){
   s <- sum(colSums(id) == 3) 
   mat_long <- rbind(mat_long, c("smb_normal & tr_high", cl,s))
 }
-
-# save the table
-fwrite(mat_long, "../result/cluster_bio_demographics.csv")
 
 # add number and proportions
 cdem <- as.data.frame(mat_long)
@@ -94,4 +91,6 @@ cdem$category <- "phenotype"
 i <- c("anyPathogenic","NFKB1","rareTNFRSF13B","canonicalTNFRSF13B" )
 cdem$category[cdem$name %in% i] <- "genotype"
 
+############## save all
+fwrite(mat_long, "../result/cluster_bio_demographics.csv")
 fwrite(cdem, "../result/cluster_demographics.csv")
