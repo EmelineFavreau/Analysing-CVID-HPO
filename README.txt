@@ -16,8 +16,8 @@ common.R: list all dependencies
 05.3-Euroclass_demographics.R: count patients following Euroclass subsets
 05.4-Bcell_HPO_associations.R: Cochran-Mantel-Haenszel tests for SmB/CD21/Tr level and each phenotype (HPO, GLILD, key HPO groups)
 05.5-immuno_HPO_associations.R: Cochran-Mantel-Haenszel tests for Immunoglobulin groups and each phenotype (HPO, GLILD, key HPO groups)
-05.6-genetic_HPO_associations.R
-05.7-clusters_associations.R
+05.6-genetic_HPO_associations.R: Cochran-Mantel-Haenszel tests for genetic variants groups and each phenotype (HPO, GLILD, key HPO groups)
+05.7-clusters_associations.R: Cochran-Mantel-Haenszel tests for infection/complex and each biomarker
 
 
 # For manuscript figures and tables:
