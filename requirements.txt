@@ -1,0 +1,8 @@
+# For generating embeddings:
+python 3.11
+node2vec
+pandas
+networkx
+
+# For data analysis and plotting:
+R 4.3.2 (2023-10-31)
