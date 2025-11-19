@@ -85,6 +85,9 @@ HPO_order <- rownames(wide_df)[order(rowSums(wide_df))]
 final_long_df <- final_long_df %>% 
   mutate(HPO_term = factor(HPO_term, levels = HPO_order))
 
+# final_long_df %>% 
+#   dplyr::filter(HPO_term == "Increased circulating IgG level" & Presence == 1)
+
 
 p_main <- final_long_df %>%
   dplyr::filter(LabClinical == "lab") %>% 
@@ -138,20 +141,15 @@ p_right <- ggplot(plot_data_right,
 Fig4 <- p_main + p_right +
   plot_layout(widths = c(3, 1))
 
-
-# 528 patients categorised as InfectionBronchiectasis or Complex
-# 65 HPO terms (appearing more than 25 times in our dataset), 
-# ordered by patient count
-# colour-coded Presence or absence of the HPO in the patient
-
-
 ############# Layout ###########################################################
-
-
-
 Fig4
 ggsave( "../result/Fig4/Fig4.jpeg",
         width = 25,
         height = 20,
         units = "cm")
 
+############# Legend details ###################################################
+# number of patients
+nrow(data)
+# number of HPO
+length(HPO_order)
