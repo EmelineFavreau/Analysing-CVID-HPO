@@ -18,13 +18,10 @@ cd21_cohort_size <- nbr %>%
 
 cd21_cohort_prop <- round((cd21_cohort_size/cohort_size)*100, 2)
 
-
 # subset, size, proportion of records with CD21 low "expansion of low CD21"
 cd21low_cohort_list <- nbr %>%
   dplyr::filter(cd21_low_b_cells_pct >= 10) %>% 
   dplyr::select(STUDY_ID)
-
-fwrite(cd21low_cohort_list, "../result/CD21low_high_patients.csv")
 
 cd21low_cohort_size <- nrow(cd21low_cohort_list)
 
@@ -35,8 +32,6 @@ cd21low_cohort_prop <- round((cd21low_cohort_size/cd21_cohort_size)*100, 2)
 cd21normal_cohort_list <- nbr %>%
   dplyr::filter(cd21_low_b_cells_pct < 10) %>%
   dplyr::select(STUDY_ID)
-
-fwrite(cd21normal_cohort_list, "../result/CD21low_normal_patients.csv")
 
 cd21normal_cohort_size <- nrow(cd21normal_cohort_list)
 
@@ -55,8 +50,6 @@ smb_cohort_prop <- round((smb_cohort_size/cohort_size)*100, 2)
 smBplus_cohort_list <- nbr %>%
   dplyr::filter(class_switched_b_cells_pct > 2) %>% dplyr::select(STUDY_ID)
 
-fwrite(smBplus_cohort_list,  "../result/SmB_plus_patients.csv")
-
 smBplus_cohort_size <- nrow(smBplus_cohort_list)
 
 smBplus_cohort_prop <- round((smBplus_cohort_size/smb_cohort_size)*100, 2)
@@ -66,8 +59,6 @@ smBminus_cohort_list <- nbr %>%
   dplyr::filter(class_switched_b_cells_pct <= 2) %>% dplyr::select(STUDY_ID)
 
 smBminus_cohort_size <- nrow(smBminus_cohort_list)
-
-fwrite(smBminus_cohort_list,  "../result/SmB_minus_patients.csv")
 
 smBminus_cohort_prop <- round((smBminus_cohort_size/smb_cohort_size)*100, 2)
 
@@ -82,8 +73,6 @@ tr_cohort_prop <- round((tr_cohort_size/cohort_size)*100, 2)
 TrNorm_cohort_list <- nbr %>%
   dplyr::filter(transitional_b_cells_pct < 9) %>% dplyr::select(STUDY_ID)
 
-fwrite(TrNorm_cohort_list,  "../result/TransitionalB_Normal_patients.csv")
-
 TrNorm_cohort_size <- nrow(TrNorm_cohort_list)
 
 TrNorm_cohort_prop <- round((TrNorm_cohort_size/tr_cohort_size)*100, 2)
@@ -93,8 +82,6 @@ TrHigh_cohort_list <- nbr %>%
   dplyr::filter(transitional_b_cells_pct >= 9) %>% dplyr::select(STUDY_ID)
 
 TrHigh_cohort_size <- nrow(TrHigh_cohort_list)
-
-fwrite(TrHigh_cohort_list,  "../result/TransitionalB_High_patients.csv")
 
 TrHigh_cohort_prop <- round((TrHigh_cohort_size/tr_cohort_size)*100, 2)
 
@@ -247,4 +234,11 @@ data <- data.frame(biological_measure,
                    biological_level,
                    number_of_patients)
 
+####################### save all
+fwrite(cd21low_cohort_list, "../result/CD21low_high_patients.csv")
+fwrite(cd21normal_cohort_list, "../result/CD21low_normal_patients.csv")
+fwrite(smBplus_cohort_list,  "../result/SmB_plus_patients.csv")
+fwrite(smBminus_cohort_list,  "../result/SmB_minus_patients.csv")
+fwrite(TrNorm_cohort_list,  "../result/TransitionalB_Normal_patients.csv")
+fwrite(TrHigh_cohort_list,  "../result/TransitionalB_High_patients.csv")
 fwrite(data, "../result/Fig2/num_patients_per_biological_category.csv")
