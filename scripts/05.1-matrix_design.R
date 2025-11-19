@@ -28,7 +28,6 @@ khap <- fread("../result/key_hpo_autoimmunity_patients.csv")
 hpo_codes <- unlist(nbr$hpo)
 unique_codes <- unique(hpo_codes)
 names(unique_codes) <- hpo$name[match(unique_codes, names(hpo$name))]
-saveRDS(unique_codes, "../result/unique_codes.RDS")
 
 # create a matching patient id vector
 patient <- rep(nbr$STUDY_ID, sapply(nbr$hpo, length))
@@ -140,5 +139,6 @@ patient_hpo_bio_mat <- rbind(phm,
                               phenotype_mat,
                               centre_mat)
 
-# save matrix
+################ save all
 saveRDS(patient_hpo_bio_mat, "../result/patient_hpo_bio_mat.RDS")
+saveRDS(unique_codes, "../result/unique_codes.RDS")
