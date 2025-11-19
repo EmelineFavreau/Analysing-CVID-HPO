@@ -2,10 +2,8 @@
 source("common.R")
 
 ######################## import input ##########################################
-
 # load nbr
 nbr <- readRDS("../result/tidy_data")
-
 
 ######################## analysis ##########################################
 # transform the spc_tbl_ into a data.table 
@@ -34,8 +32,6 @@ patient_hpo_mat <- matrix(data = 0,
 
 ## add 1 where the term matches a patient
 patient_hpo_mat[cbind(hpo_long, patient)] <- 1
-
-fwrite(patient_hpo_mat, "../result/patient_hpo_mat.csv", row.names = T)
 
 # shorten name
 z <- patient_hpo_mat
@@ -155,11 +151,14 @@ infectionBronchiectasis <- infectionBronchiectasis[!infectionBronchiectasis
 infectionBronchiectasis <- infectionBronchiectasis[!infectionBronchiectasis 
                                                    %in% infection_with_glild]
 
-fwrite(as.data.frame(infectionBronchiectasis),
-       "../result/InfectionBronchiectasisPatients.csv")
 
 # complex patients are all remaining patients
 complexPatients <- colnames(newz)[!colnames(newz) %in% infectionBronchiectasis]
 
+####################### save all
+fwrite(patient_hpo_mat, "../result/patient_hpo_mat.csv", row.names = T)
+
+fwrite(as.data.frame(infectionBronchiectasis),
+       "../result/InfectionBronchiectasisPatients.csv")
 fwrite(as.data.frame(complexPatients),
        "../result/complexPatients.csv")
