@@ -388,10 +388,6 @@ BH_immuno_CHM_table$BH_adjust_pvalue <-
   formatC(BH_immuno_CHM_table$BH_adjust_pvalue, format = "g")
 
 
-# save table
-fwrite(BH_immuno_CHM_table , "../result/Immuno_HPO_tests.csv")
-
-
 # qualify result
 c1 <- matrix(NA, ncol = 3)
 df <- BH_immuno_CHM_table
@@ -435,7 +431,9 @@ result$phenotype[result$phenotype == "nollh"]<- "NOT_lowIgGlowIgAhighIgM"
 result$phenotype[result$phenotype == "nolnl"] <- "NOT_lowIgGnormalIgAlowIgM"
 result$phenotype[result$phenotype == "nolln"] <- "NOT_lowIgGlowIgAnormalIgM"
 
+# merge info
+merged_tibble <- result %>%
+  full_join(BH_immuno_CHM_table, by = c("HPO_code" = "phenotype_code"))
 
-
-fwrite(result,
-       "../result/Immuno_HPO_tests_summary_contingency_with_ratio.csv")
+############## save all
+fwrite(merged_tibble, "../result/Immuno_HPO_tests_ratio_pvalue.csv")
