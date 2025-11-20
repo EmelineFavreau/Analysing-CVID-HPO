@@ -89,13 +89,13 @@ phenotype_df <- nbr %>%
                                    1L, 0L),
   infection_cluster = as.integer(STUDY_ID %in% infection_cluster$STUDY_ID),
   complex_cluster   = as.integer(STUDY_ID %in% complex_cluster$STUDY_ID),
-  keyHPOinfection   = as.integer(STUDY_ID %in% khip$infection_patients),
-  keyHPObronchiectasis = as.integer(STUDY_ID %in% khbp$bronchiectasis_patients),
-  keyHPOgranuloma = as.integer(STUDY_ID %in% khgp$granuloma_patients),
-  keyHPOsplenomegaly = as.integer(STUDY_ID %in% khsp$splenomegaly_patients),
-  keyHPONRHofliver = as.integer(STUDY_ID %in% khnp$NRH_of_liver_patients),
-  keyHPOlymphoproliferation = as.integer(STUDY_ID %in% khlp$lymphoproliferation_patients),
-  keyHPOautoimmunity = as.integer(STUDY_ID %in% khap$autoimmunity_patients)) %>%
+  keyHPOinfection   = as.integer(STUDY_ID %in% khip$kkk),
+  keyHPObronchiectasis = as.integer(STUDY_ID %in% khbp$kkk),
+  keyHPOgranuloma = as.integer(STUDY_ID %in% khgp$kkk),
+  keyHPOsplenomegaly = as.integer(STUDY_ID %in% khsp$kkk),
+  keyHPONRHofliver = as.integer(STUDY_ID %in% khnp$kkk),
+  keyHPOlymphoproliferation = as.integer(STUDY_ID %in% khlp$kkk),
+  keyHPOautoimmunity = as.integer(STUDY_ID %in% khap$kkk)) %>%
   dplyr::arrange(match(STUDY_ID, patient_order)) %>%
   dplyr::select(-STUDY_ID)
 

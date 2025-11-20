@@ -3,8 +3,8 @@ source("common.R")
 
 ######################## import input ##########################################
 
-# 161 HPO categorised as lab or clinical, each term in 10 or more patients
-loc <- read.csv("../input/HPO_freq_name_labORclinical_LC.csv")
+# HPO categorised as lab or clinical, each term in 10 or more patients
+loc <- read.csv("../result/HPO_freq_name_labORclinical.csv")
 
 # load nbr
 nbr <- readRDS("../result/tidy_data")
@@ -14,14 +14,14 @@ infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
 complex_cluster <- fread("../result/complexPatients.csv")
 
 ############# Fig4 ############################################################
-# keep infection/complex patients (528 patients)
+# keep infection/complex patients
 data <- nbr %>% 
   dplyr::filter(STUDY_ID %in% c(infection_cluster$infectionBronchiectasis, 
                                 complex_cluster$complexPatients)) 
 
 loc25 <- loc %>% dplyr::filter(HPO_freq > 25)
 
-# keep 65 HPO categorised as lab or clinical, each term in 25 or more patients
+# keep HPO categorised as lab or clinical, each term in 25 or more patients
 data$hpo <- sapply(data$hpo, function(x) x[x %in% loc25$HPO_code])
 
 data$hpo_long <- sapply(data$hpo,
@@ -84,10 +84,6 @@ HPO_order <- rownames(wide_df)[order(rowSums(wide_df))]
 
 final_long_df <- final_long_df %>% 
   mutate(HPO_term = factor(HPO_term, levels = HPO_order))
-
-# final_long_df %>% 
-#   dplyr::filter(HPO_term == "Increased circulating IgG level" & Presence == 1)
-
 
 p_main <- final_long_df %>%
   dplyr::filter(LabClinical == "lab") %>% 

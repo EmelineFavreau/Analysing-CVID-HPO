@@ -10,6 +10,8 @@ phbm <- readRDS("../result/patient_hpo_bio_mat.RDS")
 infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
 complex_cluster <- fread("../result/complexPatients.csv")
 
+# clinical lab label
+LC <- fread("../input/HPO_freq_name_labORclinical_LC.csv")
 ####### Cluster Demographics ############################################
 
 # count the number of patients
@@ -91,6 +93,45 @@ cdem$category <- "phenotype"
 i <- c("anyPathogenic","NFKB1","rareTNFRSF13B","canonicalTNFRSF13B" )
 cdem$category[cdem$name %in% i] <- "genotype"
 
+
+# HPO frequency in infection/complex cohort
+HPO_code <- rownames(phbm)[grep("^HP", rownames(phbm))]
+HPO_freq <- rowSums(phbm)[grep("^HP", rownames(phbm))]
+HPO_name <- hpo$name[match(HPO_code, names(hpo$name))]
+Hfnl <- tibble(HPO_code = HPO_code,
+                                      HPO_freq = HPO_freq,
+                                      HPO_name = HPO_name)
+
+# filter each term in 10 or more patients
+Hfnl <- Hfnl %>%dplyr::filter(HPO_freq >= 10)
+Hfnl$Category <- LC$Category[match(Hfnl$HPO_code, LC$HPO_code)]
+  
 ############## save all
+# main
+#When stratified into infection-only and complex groups,
+#term frequencies are separately shown as clinical terms and 
+#laboratory-related terms in Figures 3 and 4, respectively. 
+#Splenomegaly was the most frequent HPO term in the complex group,
+#present in 48% of patients in this group. 
+h = "Splenomegaly"
+names(h) <- names(hpo$name)[match(h, hpo$name)]
+i <- c("complex_cluster", names(h))
+id <- phbm[row.names(phbm) %in% i, ]
+s <- sum(colSums(id) == 2) 
+(s/nrow(complex_cluster))*100 # 44.77
+
+#Autoimmune cytopenias, 
+#particularly Autoimmune thrombocytopenia [HP:0001973], 
+#were the most frequent autoimmunity-related terms observed in 49.5% 
+#and 27.7%% of the patients in the complex group, respectively
+
+
+i <- c("complex_cluster", "HP:0001973")
+id <- phbm[row.names(phbm) %in% i, ]
+s <- sum(colSums(id) == 2) 
+(s/nrow(complex_cluster))*100 # 44.77
+
+
 fwrite(mat_long, "../result/cluster_bio_demographics.csv")
 fwrite(cdem, "../result/cluster_demographics.csv")
+fwrite(Hfnl, "../result/HPO_freq_name_labORclinical.csv")

@@ -112,4 +112,4 @@ epidemiologic_data_table <- data.frame(
 )
 
 # save table
-write.csv(epidemiologic_data_table, "../result/epidemiologic_data_table.csv")
+write.csv(epidemiologic_data_table, "../result/Table1/epidemiologic_data_table.csv")

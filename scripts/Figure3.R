@@ -3,8 +3,8 @@ source("common.R")
 
 ######################## import input ##########################################
 
-# 161 HPO categorised as lab or clinical, each term in 10 or more patients
-loc <- read.csv("../input/HPO_freq_name_labORclinical_LC.csv")
+# HPO categorised as lab or clinical, each term in 10 or more patients
+loc <- read.csv("../result/HPO_freq_name_labORclinical.csv")
 
 # load nbr
 nbr <- readRDS("../result/tidy_data")
@@ -60,7 +60,7 @@ InfectionComplex_info <- data.frame(Patient = colnames(patient_hpo_mat),
 # order HPO by patient count 
 HPO_order <- rownames(wide_df)[order(rowSums(wide_df))]
 
-# make a long df: HPO_code | HPO_term  | Patient | Presence |  InfectionComplex |  LabClinical
+# make a long df: HPO_code,HPO_term,Patient,Presence,InfectionComplex,LabClinical
 final_long_df <- wide_df %>%
   rownames_to_column(var = "HPO_term") %>%
   pivot_longer(

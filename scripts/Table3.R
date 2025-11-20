@@ -12,19 +12,24 @@ gr <- fread( "../result/genetic_HPO_tests_ratio_pvalue.csv") # genetic
 # make one table per test; subset to the biologically important
 bat <- br %>% 
   dplyr::filter(HPO_code %in% c("HP:0001744",
-                                "HP:0001973")) %>% 
+                                "HP:0001973",
+                                "keyHPOautoimmunity",
+                                "keyHPOsplenomegaly")) %>% 
   dplyr::select(-c(biological_measure))
 
 gat <- gr %>% 
   dplyr::select(-c(biological_measure)) %>% 
   dplyr::filter(HPO_code %in% c("HP:0001287",
-                                "HP:0001904", "HP:0002730",
+                                "HP:0001904",
+                                "HP:0002730",
                                 "HP:0006527")) 
 iat <- ir %>% 
   dplyr::select(-c(biological_measure)) %>% 
   dplyr::filter(HPO_code %in% c("HP:0033582","HP:0410301"))
 
 ############ save all
+ig_cohort_size <- 500
+ig_cohort_size - iat$patients_with_hpo
 fwrite(bat, "../result/Table3/Table3A.csv")
 fwrite(gat, "../result/Table3/Table3C.csv")
 fwrite(iat, "../result/Table3/Table3B.csv")

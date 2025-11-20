@@ -155,6 +155,11 @@ infectionBronchiectasis <- infectionBronchiectasis[!infectionBronchiectasis
 # complex patients are all remaining patients
 complexPatients <- colnames(newz)[!colnames(newz) %in% infectionBronchiectasis]
 
+cluster_size <- c(length(infectionBronchiectasis), length(complexPatients))
+cluster_prop <- (cluster_size/nrow(nbr)) *100
+cluster_num_perc <- tibble(cluster_size = cluster_size,
+                           cluster_prop = cluster_prop,
+                           cluster_name = c("InfectionBronchiectasis", "Complex"))
 ####################### save all
 fwrite(patient_hpo_mat, "../result/patient_hpo_mat.csv", row.names = T)
 
@@ -162,3 +167,4 @@ fwrite(as.data.frame(infectionBronchiectasis),
        "../result/InfectionBronchiectasisPatients.csv")
 fwrite(as.data.frame(complexPatients),
        "../result/complexPatients.csv")
+fwrite(cluster_num_perc, "../result/main/cluster_num_perc.csv")

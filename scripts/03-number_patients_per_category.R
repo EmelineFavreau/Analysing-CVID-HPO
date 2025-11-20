@@ -137,16 +137,17 @@ nbr$Genetic_variant[nbr$STUDY_ID %in% t$STUDY_ID[is.na(t$Genetic_variant)]] <-
 # (IUIS genes with frequencies of variants)
 # number of patients with WGS 
 sequenced_cohort_size <- sum(nbr$sequenced == 1)
-
+sequenced_cohort_prop <-  (sequenced_cohort_size/cohort_size)*100
 # number of patients with confirmed genetic diagnosis
 diagnosed_cohort_size <- sum(table(nbr$Genetic_variant))
-
+diagnosed_cohort_prop <- (diagnosed_cohort_size/cohort_size)*100
 
 # subset, size, proportion of records with any diagnostic variant
 # (no NFKB1, no TNFRSF13B)
 any_diagnosis_cohort_size <- unname(table(nbr$Genetic_variant)[
   names(table(nbr$Genetic_variant)) == "anyPathogenic"])
-any_diagnosis_diagnosed_cohort_prop <- 
+
+any_diagnosis_cohort_prop <- 
   round((any_diagnosis_cohort_size/diagnosed_cohort_size)*100, 2)
 
 any_diagnosis_sequenced_cohort_prop <- 
@@ -228,13 +229,69 @@ number_of_patients <- c(cd21low_cohort_size,
            can_rare_TNFRSF13B_cohort_size,
            any_diagnosis_cohort_size)
 
+prop_of_patients <- c(cd21low_cohort_prop,
+                       cd21normal_cohort_prop,
+                       smBminus_cohort_prop,
+                       smBplus_cohort_prop, 
+                       TrNorm_cohort_prop,
+                       TrHigh_cohort_prop,
+                       lll_cohort_prop,
+                      lln_cohort_prop,
+                      llh_cohort_prop,
+                      lnl_cohort_prop,
+                       NFKB1_cohort_prop,
+                       canonical_TNFRSF13B_cohort_prop,
+                       rare_TNFRSF13B_cohort_prop,
+                       can_rare_TNFRSF13B_cohort_prop,
+                       any_diagnosis_cohort_prop)
+
 # plots will be bar plot, % will be in captions.
 data <- data.frame(biological_measure,
                    biological_category,
                    biological_level,
-                   number_of_patients)
+                   number_of_patients,
+                   prop_of_patients)
 
 ####################### save all
+# for main
+# Switched memory B cell measurements were available for N (N%) participants, 
+c(smb_cohort_size, smb_cohort_prop)
+# with N (N%) classified as smB+ and N (N%) as smB-. 
+
+# CD21low B cells data were recorded for N (N%),
+c(cd21_cohort_size, cd21_cohort_prop)
+# of whom N (N%) had expansion of this subset and N (N%) had normal CD21low levels.
+
+# Transitional B cells were recorded for N patients (N%), 
+c(tr_cohort_size, tr_cohort_prop)
+# with N (N%) within the normal range and N (N%) with elevated values.
+data
+
+
+#Genetic data were available for
+c(sequenced_cohort_size, sequenced_cohort_prop)
+
+#of whom carried a relevant  genetic finding. 
+c(diagnosed_cohort_size, diagnosed_cohort_prop)
+
+#Among these, 19 patients (20.0% of diagnosed, 4.4% of sequenced) 
+#carried NFKB1 variants. 
+c(NFKB1_cohort_size, NFKB1_cohort_prop, NFKB1_sequenced_cohort_prop)
+#Variants in TNFRSF13B were identified in 37 patients (8.5% of sequenced),
+
+#including 27 (6.2% of sequenced) with canonical form,
+c(canonical_TNFRSF13B_cohort_size,
+  canonical_TNFRSF13B_sequenced_cohort_prop)
+#9 (2.1%) with the rare form, and 1 (0.2%) carrying both. 
+c(rare_TNFRSF13B_cohort_size,
+  rare_TNFRSF13B_sequenced_cohort_prop)
+c(can_rare_TNFRSF13B_cohort_size,
+  can_rare_TNFRSF13B_sequenced_cohort_prop)
+#The remaining 41 patients (43.2% of those with a confirmed diagnosis) 
+#carried variants in genes other than NFKB1 or TNFRSF13B.  
+c(any_diagnosis_cohort_size,
+  any_diagnosis_cohort_prop )
+
 fwrite(cd21low_cohort_list, "../result/CD21low_high_patients.csv")
 fwrite(cd21normal_cohort_list, "../result/CD21low_normal_patients.csv")
 fwrite(smBplus_cohort_list,  "../result/SmB_plus_patients.csv")

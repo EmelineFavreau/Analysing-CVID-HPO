@@ -232,4 +232,8 @@ num_hpo_comp$differential <- num_hpo_comp$num_hpo_after -
 index <- match(num_hpo_comp$STUDY_ID, common_STUDY_ID_vec)
 num_hpo_comp$before_after_similarity_value <- similarity_value_vec[index]
 
+nrow(num_hpo_comp)# for main text
+sum(num_hpo_comp$differential < 0)# for main text
+summary(num_hpo_comp$differential[num_hpo_comp$differential >0])# for main text
 fwrite(num_hpo_comp, "../result/Fig1/num_hpo_comp.csv")
+

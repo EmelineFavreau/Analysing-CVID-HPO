@@ -1,5 +1,5 @@
 # load python version
 module load python/3.11.0-icl
 
-# generate embeddings prior to scripts/Figure6.T
-python3 scripts/create_embeddings.py HPO_id_no_Bcell_filtering.tsv HPO_id_no_Bcell_filtering_embeddings.emb
+# generate embeddings prior to scripts/Figure6.R
+python3 scripts/create_embeddings.py tmp/HPO_id_no_Bcell_filtering.tsv HPO_id_no_Bcell_filtering_embeddings.emb

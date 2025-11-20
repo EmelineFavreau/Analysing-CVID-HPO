@@ -39,7 +39,7 @@ Fig1A <- ggplot(df, aes(x = x,
         axis.ticks = element_blank(),
         axis.text.y = element_text(angle = 0, hjust = 1.5),
         legend.position.inside = c(0.95, 0.05),  # Position legend at the bottom-right
-        legend.justification = c("right", "bottom")) +
+        legend.justification = c("right", "top")) +
   labs(x = NULL, y = NULL,
        fill = "Semantic Similarity")
 
@@ -56,8 +56,7 @@ Fig1B <- ggplot(num_hpo_compL,
                 aes(x = Timepoint, y = Records, fill = Timepoint)) +
   geom_violin(alpha = 0.5, trim = FALSE) +  
   geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +  
-  labs(
-       x = "",
+  labs(x = "",
        y = "Number of HPOs per patient") +
   scale_fill_manual(values = training_colours) +
   theme(legend.position = "none") +
@@ -87,13 +86,14 @@ Fig1C <- ggplot(num_hpo_comp,
 
 ############# Layout ###########################################################
 
-toppatch <- Fig1A 
-bottompatch <- Fig1B | Fig1C
 
+plots <- cowplot::align_plots(Fig1A, Fig1B,
+                              align = 'v', axis = 'l')
+bottom_row <- cowplot::plot_grid(plots[[2]], Fig1C,
+                                 labels = c('b', 'c'), label_size = 12)
+Fig1 <- cowplot::plot_grid(plots[[1]], bottom_row, 
+                           labels = c('a', ''), label_size = 12, ncol = 1)
 
-patchwork1 <-  Fig1A / (Fig1B | Fig1C) +
-  plot_layout(widths = 1) # because Fig1A is coord_fixed
-patchwork1 + plot_annotation(tag_levels = 'a')
 
 ggsave("../result/Fig1/Fig1.jpeg",
        width = 20,

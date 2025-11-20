@@ -49,4 +49,22 @@ euroclass_STUDYID_df <- as.data.frame(rbind(
 colnames(euroclass_STUDYID_df) <- c("euroclass_group", "STUDY_ID")
 
 ############## save all
+# for main
+#Categorisation according to EUROClass definitions identified N patients 
+# in the smB- group,
+sum(euroclass_STUDYID_df$euroclass_group == "smBminus_Euroclass")
+#with further subdivision into smB-/CD21lo
+sum(euroclass_STUDYID_df$euroclass_group == "smBminusCD21lo_Euroclass")
+#smB-/CD21norm
+sum(euroclass_STUDYID_df$euroclass_group == "smBminusCD21norm_Euroclass")
+#smB-/Trhi
+sum(euroclass_STUDYID_df$euroclass_group == "smBminusTrhi_Euroclass")
+#and smB-/Trnorm
+sum(euroclass_STUDYID_df$euroclass_group == "smBminusTrnorm_Euroclass")
+#Among patients with smB+, 
+sum(euroclass_STUDYID_df$euroclass_group == "smBplus_Euroclass")
+#smB+/CD21lo and as smB+/CD21norm .
+sum(euroclass_STUDYID_df$euroclass_group == "smBplus21lo_Euroclass")
+sum(euroclass_STUDYID_df$euroclass_group == "smBplus21norm_Euroclass")
+
 fwrite(euroclass_STUDYID_df, "../result/euroclass_STUDYID.csv")

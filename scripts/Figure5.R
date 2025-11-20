@@ -40,6 +40,10 @@ p_value_data <- Fig5data %>%
   left_join(cr, by = "biological_measure") %>%
   mutate(p_label = sprintf("p = %.2g", BH_adjust_pvalue))
 
+psmb <- unique(cr$BH_adjust_pvalue[cr$biological_measure %in% c("smb")]) %>% 
+  format(., scientific = FALSE, digits = 1)
+pcd21<- unique(cr$BH_adjust_pvalue[cr$biological_measure %in% c("cd21")]) %>% 
+  format(., scientific = FALSE, digits = 1)
 
 # Create a data frame for the bracket(s)
 bracket_data <- data.frame(
@@ -48,11 +52,11 @@ bracket_data <- data.frame(
   xmax = c("SmB-", "CD21low high"),
   y.position = c(45, 40), 
   label = c(paste("p = ",
-        round(unique(cr$BH_adjust_pvalue[cr$biological_measure %in% c("smb")]),
-              digits = 5), sep =""),
+            psmb,
+            sep =""),
             paste("p = ", 
-        round(unique(cr$BH_adjust_pvalue[cr$biological_measure %in% c("cd21")]),
-              digits = 5), sep =""))
+            pcd21,
+            sep =""))
 )
 
 

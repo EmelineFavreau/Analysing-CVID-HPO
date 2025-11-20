@@ -6,19 +6,19 @@ source("common.R")
 # load nbr
 nbr <- readRDS("../result/tidy_data")
 
-thisfocus <- "no_Bcell_filtering"
+tf <- "no_Bcell_filtering"
 
 # each row describes the relationship between two HPO terms
 # e.g. 1st row: relationship between term 1 (HP:0004315) & term 885 (HP:0000001)
 result_with_id <- fread(paste("../result/reduc_dim_input_with_id_",
-                              thisfocus, ".csv", sep = ""))
+                              tf, ".csv", sep = ""))
 
 
 # import the embeddings (capturing the context of the HPO, 
 # how often it is associated with other HPOs in the onthology pathway)
 HPO_id_embeddings <- 
   fread(paste("../result/HPO_id_",
-              thisfocus,"_embeddings.emb", sep =""), skip = 1)
+              tf,"_embeddings.emb", sep =""), skip = 1)
 
 # import presence absence of HPO
 # no obsolete terms (aka terms with no edge)
@@ -26,7 +26,7 @@ HPO_id_embeddings <-
 # all patients 
 phmnoNA <- 
   readRDS(paste("../result/patient_hpo_bio_mat_for_reduc_dim_",
-                thisfocus,".rds", sep = ""))
+                tf,".rds", sep = ""))
 
 # load patient clusters 
 infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
@@ -69,19 +69,20 @@ hieo <- as.matrix(hieo)
 pemb <- ppp %*% hieo
 
 ## PCA
-p=prcomp(pemb)$x %>% as.data.frame()
+p <- prcomp(pemb)$x %>% as.data.frame()
 p$cluster <- ifelse(rownames(p) %in% complex_patients,
                     "complex",
              ifelse(rownames(p) %in% infection_patients,
                     "infection", NA))
 p$CENTRE <- nbr$CENTRE[match(rownames(p), nbr$STUDY_ID)]
 
-left=ggplot(p,
+# plots
+left <- ggplot(p,
             aes(x=PC1, y=PC2, col=cluster)) +
   geom_point(size = 0.71) + 
   scale_colour_manual(values = infComp) 
 
-right=ggplot(p, aes(x=PC1, y=PC2, col=CENTRE, shape=CENTRE)) +
+right <- ggplot(p, aes(x=PC1, y=PC2, col=CENTRE, shape=CENTRE)) +
     geom_point() +
   scale_fill_manual(values = centrescol) +
     scale_colour_manual(values = centrescol) +
