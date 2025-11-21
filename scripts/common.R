@@ -12,8 +12,7 @@ library(ggpubr)
 library(ggplot2)
 library(ontologyIndex)
 library(ontologySimilarity)
-if(system("whoami",intern=TRUE)!="chrisw")
-  library(ontologyPlot)
+library(ontologyPlot)
 library(paletteer)
 library(patchwork)
 library(pheatmap)
@@ -79,8 +78,7 @@ clinLab <-  c("clinical" = "#b2df8a",
 infComp <- c("complex"="#fb9ac7","infection"="#084594")
 
 
-# Fig 6: PCA
-# 11 centres in colours
+# Fig 6: centres in colours
 centrescol <- c("#5F4690FF", "#666666FF","#1D6996FF", 
                 "#0F8554FF",
   "#73AF48FF", "#EDAD08FF", "#E17C05FF", "#CC503EFF",

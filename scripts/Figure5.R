@@ -4,7 +4,7 @@ source("common.R")
 ######################## import input ##########################################
 
 cluster_demographics <- fread("../result/cluster_demographics.csv")
-cr <- fread( "../result/cluster_biomarker_tests_ratio_pvalue.csv") # cluster
+cr <- fread( "../result/cluster_biomarker_tests_ratio_pvalue.csv") 
 
 
 ############# Fig5 ############################################################

@@ -10,8 +10,6 @@ phbm <- readRDS("../result/patient_hpo_bio_mat.RDS")
 # take in the HPO data,create and save embeddings + HPO
 # make an edge list: each row contains two columns describing a edge in the HPO
 # onthology
-# in preparation for https://github.com/eliorc/node2vec/blob/master/README.md
-
 
 # subset to just the HPO terms and the patients with complete B cell
 phm <- phbm[grep("^HP", rownames(phbm)), ] 

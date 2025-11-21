@@ -50,10 +50,9 @@ colnames(euroclass_STUDYID_df) <- c("euroclass_group", "STUDY_ID")
 
 ############## save all
 # for main
-#Categorisation according to EUROClass definitions identified N patients 
 # in the smB- group,
 sum(euroclass_STUDYID_df$euroclass_group == "smBminus_Euroclass")
-#with further subdivision into smB-/CD21lo
+# smB-/CD21lo
 sum(euroclass_STUDYID_df$euroclass_group == "smBminusCD21lo_Euroclass")
 #smB-/CD21norm
 sum(euroclass_STUDYID_df$euroclass_group == "smBminusCD21norm_Euroclass")

@@ -108,24 +108,16 @@ Hfnl$Category <- LC$Category[match(Hfnl$HPO_code, LC$HPO_code)]
   
 ############## save all
 # main
-#When stratified into infection-only and complex groups,
-#term frequencies are separately shown as clinical terms and 
-#laboratory-related terms in Figures 3 and 4, respectively. 
-#Splenomegaly was the most frequent HPO term in the complex group,
-#present in 48% of patients in this group. 
+ 
+#Splenomegaly  in the complex group,
 h = "Splenomegaly"
 names(h) <- names(hpo$name)[match(h, hpo$name)]
 i <- c("complex_cluster", names(h))
 id <- phbm[row.names(phbm) %in% i, ]
 s <- sum(colSums(id) == 2) 
-(s/nrow(complex_cluster))*100 # 44.77
+(s/nrow(complex_cluster))*100 
 
-#Autoimmune cytopenias, 
-#particularly Autoimmune thrombocytopenia [HP:0001973], 
-#were the most frequent autoimmunity-related terms observed in 49.5% 
-#and 27.7%% of the patients in the complex group, respectively
-
-
+#Autoimmune cytopenias  in the complex group, respectively
 i <- c("complex_cluster", "HP:0001973")
 id <- phbm[row.names(phbm) %in% i, ]
 s <- sum(colSums(id) == 2) 

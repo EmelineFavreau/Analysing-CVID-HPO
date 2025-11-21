@@ -17,35 +17,38 @@ df1 <- data.table(HPO_code = HPO_code,
                  HPO_name = hpo$name[match(HPO_code, names(hpo$name))])
 
 cohort_size <- ncol(patient_hpo_bio_mat)
+
 # for main
-#Expected immunological features such as decreased circulating IgG, IgA and IgM levels, 
+ 
+output_proportion <- function(vec){
+  pp <- (df1$HPO_freq[df1$HPO_name %in%
+                  vec]/cohort_size)*100
+  return(pp)
+}
+#decreased circulating IgG, IgA and IgM levels,
+output_proportion(c("Decreased circulating IgG level",
+                "Decreased circulating IgA level",
+                "Decreased circulating total IgM"))
 
-(df1$HPO_freq[df1$HPO_name %in% c("Decreased circulating IgG level",
-                                 "Decreased circulating IgA level",
-                                 "Decreased circulating total IgM")]/cohort_size)*100
+#decreased proportion of class-switched memory B cells 
+output_proportion(c("Decreased proportion of class-switched memory B cells"))
 
-#and a decreased proportion of class-switched memory B cells 
-(df1$HPO_freq[df1$HPO_name %in% 
-                c("Decreased proportion of class-switched memory B cells")]/cohort_size)*100
+#recurrent bacterial infections
+output_proportion(c("Recurrent bacterial infections"))
 
-#were among the most frequently annotated terms, 
-#along with recurrent bacterial infections (42.2%). 
-(df1$HPO_freq[df1$HPO_name %in% 
-    c("Recurrent bacterial infections")]/cohort_size)*100
-#In addition to these diagnostics and defining features, 
-#granular phenotypes were also captured, including decreased DLCO (9.65%),
-(df1$HPO_freq[df1$HPO_name %in% 
-                c("Decreased DLCO")]/cohort_size)*100
-#ground-glass opacification (9.1%), "ground-glass opacification "
-(df1$HPO_freq[df1$HPO_name %in% 
-                c("Ground-glass opacification")]/cohort_size)*100
-#nodular regenerative hyperplasia of liver (6.8%) 
-(df1$HPO_freq[df1$HPO_name %in% 
-                c("Nodular regenerative hyperplasia of liver")]/cohort_size)*100
-#portal hypertension (6.4%), 
-(df1$HPO_freq[df1$HPO_name %in% 
-                c("Portal hypertension")]/cohort_size)*100
-#and villous atrophy (3%). 
-(df1$HPO_freq[df1$HPO_name %in% 
-                c("Villous atrophy")]/cohort_size)*100
+#decreased DLCO
+output_proportion(c("Decreased DLCO"))
+
+#ground-glass opacification
+output_proportion(c("Ground-glass opacification"))
+
+#nodular regenerative hyperplasia of liver
+output_proportion(c("Nodular regenerative hyperplasia of liver"))
+
+#portal hypertension
+output_proportion(c("Portal hypertension"))
+
+#villous atrophy 
+output_proportion(c("Villous atrophy"))
+
 fwrite(df1, "../result/SI/Suppl_Table_Complete_HPO_list.csv")

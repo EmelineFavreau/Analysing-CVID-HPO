@@ -236,9 +236,9 @@ prop_of_patients <- c(cd21low_cohort_prop,
                        TrNorm_cohort_prop,
                        TrHigh_cohort_prop,
                        lll_cohort_prop,
-                      lln_cohort_prop,
-                      llh_cohort_prop,
-                      lnl_cohort_prop,
+                       lln_cohort_prop,
+                       llh_cohort_prop,
+                       lnl_cohort_prop,
                        NFKB1_cohort_prop,
                        canonical_TNFRSF13B_cohort_prop,
                        rare_TNFRSF13B_cohort_prop,
@@ -254,41 +254,38 @@ data <- data.frame(biological_measure,
 
 ####################### save all
 # for main
-# Switched memory B cell measurements were available for N (N%) participants, 
+# Switched memory B cell measurements
 c(smb_cohort_size, smb_cohort_prop)
-# with N (N%) classified as smB+ and N (N%) as smB-. 
 
-# CD21low B cells data were recorded for N (N%),
+# CD21low B cells data
 c(cd21_cohort_size, cd21_cohort_prop)
-# of whom N (N%) had expansion of this subset and N (N%) had normal CD21low levels.
 
-# Transitional B cells were recorded for N patients (N%), 
+# Transitional B cells
 c(tr_cohort_size, tr_cohort_prop)
-# with N (N%) within the normal range and N (N%) with elevated values.
+
+# details
 data
 
-
-#Genetic data were available for
+#Genetic data 
 c(sequenced_cohort_size, sequenced_cohort_prop)
 
-#of whom carried a relevant  genetic finding. 
+#relevant genetic finding 
 c(diagnosed_cohort_size, diagnosed_cohort_prop)
 
-#Among these, 19 patients (20.0% of diagnosed, 4.4% of sequenced) 
-#carried NFKB1 variants. 
+# NFKB1 variants 
 c(NFKB1_cohort_size, NFKB1_cohort_prop, NFKB1_sequenced_cohort_prop)
-#Variants in TNFRSF13B were identified in 37 patients (8.5% of sequenced),
 
-#including 27 (6.2% of sequenced) with canonical form,
+#Variants in TNFRSF13B canonical form
 c(canonical_TNFRSF13B_cohort_size,
   canonical_TNFRSF13B_sequenced_cohort_prop)
-#9 (2.1%) with the rare form, and 1 (0.2%) carrying both. 
+
+#the rare form, and both. 
 c(rare_TNFRSF13B_cohort_size,
   rare_TNFRSF13B_sequenced_cohort_prop)
 c(can_rare_TNFRSF13B_cohort_size,
   can_rare_TNFRSF13B_sequenced_cohort_prop)
-#The remaining 41 patients (43.2% of those with a confirmed diagnosis) 
-#carried variants in genes other than NFKB1 or TNFRSF13B.  
+
+# variants in genes other than NFKB1 or TNFRSF13B.  
 c(any_diagnosis_cohort_size,
   any_diagnosis_cohort_prop )
 
