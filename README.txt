@@ -3,8 +3,7 @@ Scripts used for HPO analyses:
 # Set up
 common.R: list all dependencies
 
-# Clean data:
-00-data_cleaning.R: input lab values as HPO, exclude records that do not match analysis design
+# Clean data by inputting lab values as HPO, excluding records that do not match analysis design
 
 # For primary analyses:
 01-epidemiology_table.R: count patients for age, sex, CVID presentations
