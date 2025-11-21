@@ -2,3 +2,4 @@
 .DS_Store
 input/
 result/
+scripts/00-data_cleaning.R
