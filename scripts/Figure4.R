@@ -14,6 +14,9 @@ infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
 complex_cluster <- fread("../result/complexPatients.csv")
 
 ############# Fig4 ############################################################
+figname <- "Fig4"
+fn <- "lab"
+
 # keep infection/complex patients
 data <- nbr %>% 
   dplyr::filter(STUDY_ID %in% c(infection_cluster$infectionBronchiectasis, 
@@ -65,7 +68,8 @@ final_long_df <- wide_df %>%
     names_to = "Patient",
     values_to = "Presence") %>%
   left_join(LabClinical_info, by = "HPO_term") %>%
-  left_join(InfectionComplex_info, by = "Patient")
+  left_join(InfectionComplex_info, by = "Patient") %>%
+  dplyr::filter(LabClinical == fn)
 
 # shorten two terms
 long_term_t <- final_long_df$HPO_term[grep("Complete or near-complete",
@@ -86,7 +90,6 @@ final_long_df <- final_long_df %>%
   mutate(HPO_term = factor(HPO_term, levels = HPO_order))
 
 p_main <- final_long_df %>%
-  dplyr::filter(LabClinical == "lab") %>% 
   ggplot(aes(x = HPO_term,
              y = Patient,
              fill = as.factor(Presence))) +
@@ -139,10 +142,10 @@ Fig4 <- p_main + p_right +
 
 ############# Layout ###########################################################
 Fig4
-ggsave( "../result/Fig4/Fig4.jpeg",
-        width = 25,
-        height = 20,
-        units = "cm")
+ggsave(paste("../result/", figname, "/", figname, ".jpeg", sep = ""),
+       width = 25,
+       height = 20,
+       units = "cm")
 
 ############# Legend details ###################################################
 # number of patients

@@ -14,6 +14,9 @@ infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
 complex_cluster <- fread("../result/complexPatients.csv")
 
 ############# Fig3 ############################################################
+figname <- "Fig3"
+fn <- "clinical"
+
 # keep infection/complex patients
 data <- nbr %>% 
   dplyr::filter(STUDY_ID %in% c(infection_cluster$infectionBronchiectasis, 
@@ -69,13 +72,11 @@ final_long_df <- wide_df %>%
     values_to = "Presence") %>%
   left_join(LabClinical_info, by = "HPO_term") %>%
   left_join(InfectionComplex_info, by = "Patient") %>% 
-  mutate(
-    HPO_term = factor(HPO_term, levels = HPO_order)
-  )
+  mutate(HPO_term = factor(HPO_term, levels = HPO_order)) %>%
+  dplyr::filter(LabClinical == fn)
 
 
 p_main <- final_long_df %>%
-  dplyr::filter(LabClinical == "clinical") %>% 
   ggplot(aes(x = HPO_term,
                      y = Patient,
                      fill = as.factor(Presence))) +
@@ -128,7 +129,7 @@ Fig3 <- p_main + p_right +
 
 ############# Layout ###########################################################
 Fig3
-ggsave("../result/Fig3/Fig3.jpeg",
+ggsave(paste("../result/", figname, "/", figname, ".jpeg", sep = ""),
         width = 25,
         height = 20,
         units = "cm")
