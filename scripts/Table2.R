@@ -6,42 +6,76 @@ source("common.R")
 # load nbr
 nbr <- readRDS("../result/tidy_data")
 
-# col: STUDY_ID,Sequenced,Genetic diagnosis
-# Each row describes a patient, Yes or No, Gene symbol (e.g. NFKB1)
-genotypes <- read_excel("../input/Genotypes.xlsx")
+# Each row describes a patient carrying a rare TNFRSF13B variation
+trp <- read_excel("../input/Genotype_Final.xlsx", 
+                                      sheet = "Summary", range = "B1:B8")
+
+# Each row describes a patient carrying a canonical TNFRSF13B variation
+tcp <- read_excel("../input/Genotype_Final.xlsx", 
+                                     sheet = "Summary", range = "A1:A31")
+
+# Each row describes a patient carrying NFKB1 variation 
+nfp <- read_excel("../input/Genotype_Final.xlsx", 
+                             sheet = "Summary", range = "C1:C20")
+
+# Each column lists patients with other diagnostic variants than TACI or NFKB1
+pp <- 
+  read_excel("../input/Genotype_Final.xlsx", 
+             sheet = "Summary", range = "D1:D26")
 
 ############# tidy ############################################################
+trp <- trp[trp$TNFRsf13B_rare %in% nbr$STUDY_ID,]
+tcp <- tcp[tcp$TNFRSF13B_canonical %in% nbr$STUDY_ID,]
+nfp <- nfp[nfp$NFKB1 %in% nbr$STUDY_ID,]
+pp <- pp[pp$Other %in% nbr$STUDY_ID,]
 
-# Option with HPO
-#a table with sex + gene + hpo for the patients with a genetic diagnosis?
-tt <- nbr %>% 
-  dplyr::filter(!is.na(Genetic_variant)) %>% 
-  dplyr::select(SEX, Genetic_variant, hpo, STUDY_ID)
-
-tt$Genetic_variant[tt$Genetic_variant == 
-                     "anyPathogenic"] <- "any pathogenic variant"
-tt$Genetic_variant[tt$Genetic_variant == 
-                     "anyPathogenicNFKB1"] <- "NFKB1"
-tt$Genetic_variant[tt$Genetic_variant == 
-                     "anyPathogeniccanonicalTNFRSF13B"] <- "canonical TNFRSF13B"
-tt$Genetic_variant[tt$Genetic_variant == 
-                     "anyPathogenicrareTNFRSF13B"] <- "rare TNFRSF13B"
-tt$Genetic_variant[tt$Genetic_variant == 
-                     "anyPathogenicNFKB1canonicalTNFRSF13B"] <-
-  "NFKB1 & canonical TNFRSF13B"
-tt$Genetic_variant[tt$Genetic_variant == 
-                     "canonicalTNFRSF13B" ] <- "canonical TNFRSF13B"
+si <- c(trp$TNFRsf13B_rare,
+  tcp$TNFRSF13B_canonical,
+  nfp$NFKB1,
+  pp$Other)
 
 
-# Option placeholder
-pp <- genotypes %>% 
-  dplyr::filter(STUDY_ID %in% tt$STUDY_ID) %>%
-  dplyr::select(-Sequenced)
+dg <- c(rep("Rare TNFRSF13B", times = nrow(trp)),
+        rep("Canonical TNFRSF13B", times = nrow(tcp)),
+        rep("NFKB1", times = nrow(nfp)),
+        rep("other", times = nrow(pp)))
 
-pp$Genetic_variant <- nbr$Genetic_variant[match(pp$STUDY_ID,
-                                                nbr$STUDY_ID)]
+tt <- tibble(si = si,
+             Patient = paste("Patient ", 1:length(si), sep = ""),
+       Sex = nbr$SEX[match(si, nbr$STUDY_ID)],
+       Diagnosis_gene = ifelse(dg == "other",
+                        nbr$`Diagnosis gene`[match(si, nbr$STUDY_ID)],
+                        dg))
 
+tochange <- grep("^HGNC:", tt$Diagnosis_gene, value = TRUE)
 
-#tt$Genetic_variant
+# update to the valid code using biomart; get the database 
+ensembl <- useMart("ensembl",
+                   dataset = "hsapiens_gene_ensembl")
+
+# input a vector, get a df with 2 columns
+query_genes <- function(x) getBM(
+  attributes = c("hgnc_symbol", "hgnc_id"),
+  filters = "hgnc_id",
+  values = x,
+  mart = ensembl)
+
+# two columns: gene symbol, gene id
+genes_with_symbol_df <- query_genes(tochange)
+
+for(g in 1:nrow(tt)){
+  gg <- tt$Diagnosis_gene[g]
+  if(gg %in% genes_with_symbol_df$hgnc_id){
+    tt$Diagnosis_gene[g] <- 
+      genes_with_symbol_df$hgnc_symbol[genes_with_symbol_df$hgnc_id == gg]
+  }
+} 
+
+tt <- tt %>% dplyr::select(-c(si))
+
+tt <- tt %>% dplyr::select(-c(Patient)) %>% 
+  group_by(Diagnosis_gene, Sex) %>% 
+  mutate(Patient_count = n()) %>% dplyr::distinct()
+
 ############# save all #########################################################
-fwrite(tt, "../result/Table2/Table2-with-HPO.csv")
+fwrite(tt, "../result/Table2/Table2.csv")

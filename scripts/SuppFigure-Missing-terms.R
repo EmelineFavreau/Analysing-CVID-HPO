@@ -2,19 +2,20 @@
 source("common.R")
 
 ######################## import input ##########################################
-
-
 # missing terms are designed by Luiza
 # the first data frame describe the new terms (term and code) and their parents
 mhtp <- 
-  read_excel("../input/Missing_HPO_Terms_Proposal.LC.cleaned.xlsx", 
+  read_excel("../input/Missing_HPO_Terms_Proposal_LC_paper.xlsx", 
              sheet = "parents")
 
 
 ############# Suppl Table New terms DAG ####################################
-
-# vector of the terms 
-missing_HPO_terms <- unique(mhtp$ProposedTerm[is.na(mhtp$ProposedCode)])
+############## creating new HPO codes
+# vector of the new terms 
+missing_HPO_terms <- mhtp %>% 
+  dplyr::filter(ProposedCode == "ProposedCode") %>% 
+  dplyr::select(ProposedTerm) %>% 
+  unlist() %>% unique()
 
 # create temporary missing codes
 nums <- seq(from = 9999901,
@@ -25,88 +26,95 @@ missing_HPO_codes <- sprintf("HP:%07d", nums)
 # assign them randomly
 names(missing_HPO_codes) <- missing_HPO_terms
 
-# input them in the df
+# input them in the column for Proposed Code and Parent Code
 for(i in 1:length(missing_HPO_codes)){
   tt <- missing_HPO_codes[i]
   mhtp$ProposedCode[mhtp$ProposedTerm == names(tt)] <- tt
+  mhtp$ProposedParentCode[mhtp$ProposedParentTerm == names(tt)] <- tt
 }
+# subset of new terms with new terms as parents 
+missing_HPO_terms_on_new_branch <- mhtp %>% 
+  dplyr::filter(ProposedParentCode %in% missing_HPO_codes) %>% 
+  dplyr::select(ProposedParentTerm) %>% 
+  unlist() %>% unique()
 
-# update parent code if relationship is known
-u <- mhtp$ProposedParentTerm[mhtp$ProposedParentCode == "NA"]
-for(i in 1:length(u)){
-  tc <- missing_HPO_codes[match(u[i], names(missing_HPO_codes))]
-  mhtp$ProposedParentCode[mhtp$ProposedParentTerm == names(tc)] <- tc
-}
+# add code to terms 
+names(missing_HPO_terms_on_new_branch) <- 
+  missing_HPO_codes[match(missing_HPO_terms_on_new_branch,
+                          names(missing_HPO_codes))]
 
-
-# each element is a character vector of HPO codes of the direct parents,
-# and is named with the HPO code
+############## creating hpo database elements with new terms
+# 1. missing_HPO_parents: 
+# each element is a character vector of HPO codes of the direct parents, (vector is direct parent)
+# and is named with the HPO code (name is child)
 missing_HPO_parents <- lapply(unname(missing_HPO_codes),
-   function(x) mhtp$ProposedParentCode[grep(x, mhtp$ProposedCode)])
+   function(x) unique(mhtp$ProposedParentCode[grep(x, mhtp$ProposedCode)]))
 names(missing_HPO_parents) <- missing_HPO_codes
 
-
-
-# add the following:
-# "Tuberculous mycobacterial infection"(#7) is parent to
-# "Disseminated tuberculous mycobacterial infection" (#7)
-# "Viral meningitis" is parent to "Herpes (simplex) meningitis"
-# "Viral meningitis" is parent to  "Recurrent herpes meningitis"
-# "Unusual bacterial infection" is parent to "Bacterial meningitis"
-# "Non-infectious encephalitis" is parent to "Autoimmune encephalitis"
-# vector of parents 
-pcv <- c("Tuberculous mycobacterial infection",
-         "Viral meningitis",
-         "Viral meningitis",
-         "Unusual bacterial infection",
-         "Non-infectious encephalitis")
-# add the vector names, representing the children
-# e.g. "Disseminated tuberculous mycobacterial infection" is child of 
-# "Tuberculous mycobacterial infection"
-names(pcv) <- c("Disseminated tuberculous mycobacterial infection",
-                "Herpes (simplex) meningitis",
-                "Recurrent herpes meningitis",
-                "Bacterial meningitis",
-                "Autoimmune encephalitis")
-
-# update relationships
-for(i in 1:length(pcv)){
-  oc <- grep(pcv[i], names(missing_HPO_codes), fixed = TRUE) # the order of the parent
-  occ <- grep(names(pcv[i]), names(missing_HPO_codes), fixed = TRUE) # the order of the child
-  missing_HPO_parents[[occ]] <- c(missing_HPO_parents[[occ]], missing_HPO_parents[[oc]]) 
-}
-
-# each element is a character vector of HPO codes of the children,
-# and is named with the HPO code
+# 2. missing_HPO_children: 
+# each element is a character vector of HPO codes of the children, (vector is children)
+# and is named with the HPO code (name is the parent)
 missing_HPO_children <- lapply(unname(missing_HPO_codes),
-                               function(x) character())
+                               function(x) character()) # most of new terms are branch-ending, no children
 names(missing_HPO_children) <- missing_HPO_codes
 
-for(i in 1:length(pcv)){
-  # find the code for the parent (e.g. "HP:999990")
-  pc <- missing_HPO_codes[names(missing_HPO_codes) == pcv[i]]
-  # find the code for the child (e.g. "HP:9999908" )
-  cc <- missing_HPO_codes[names(missing_HPO_codes) == names(pcv)[i]]
+# updating missing_HPO_children with missing_HPO_terms_on_new_branch:
+for(i in 1:length(missing_HPO_terms_on_new_branch)){
+  # find the code for the parent
+  cc <- names(missing_HPO_terms_on_new_branch)[i]
+  # find the codes for the children
+  pc <- mhtp$ProposedCode[mhtp$ProposedParentCode %in% cc]
   # add the code of the child, when the element is the parent
-  missing_HPO_children[names(missing_HPO_children) == pc] <- cc
+  j <- grep(cc, names(missing_HPO_children))
+  missing_HPO_children[[j]] <- pc
 }
 
 
 
 
-
-# list: each element is a character vector of HPO codes of all ancestors,
-# including the direct parents, and is named with the HPO code
+# 3. missing_HPO_ancestors: 
+# list: each element is a character vector of HPO codes of all ancestors, (vector is list of all ancestors)
+# including the direct parents, and is named with the HPO code (name is any HPO)
 missing_HPO_ancestors <- lapply(missing_HPO_parents,
                                 function(x) get_ancestors(hpo, x))
 
+for(i in 1:length(missing_HPO_codes)){
+  occ <- grep(missing_HPO_codes[i],
+              names(missing_HPO_ancestors),
+              fixed = TRUE) 
+  pn <- mhtp$ProposedParentCode[grep(missing_HPO_codes[i],
+                                     mhtp$ProposedCode,
+                                     fixed = TRUE)]
+  au <- unique(c(missing_HPO_ancestors[[occ]], pn))
+  missing_HPO_ancestors[[occ]] <- unique(c(missing_HPO_ancestors[[occ]], pn))
+}
 
-# update relationships
-for(i in 1:length(pcv)){
-  oc <- grep(pcv[i], names(missing_HPO_codes), fixed = TRUE) # the order of the parent
-  occ <- grep(names(pcv[i]), names(missing_HPO_codes), fixed = TRUE) # the order of the child
-  missing_HPO_ancestors[[occ]] <- unique(c(missing_HPO_ancestors[[occ]],
-                                  unname(missing_HPO_codes[oc])))
+
+# in case of grand child, add grandparent
+for(i in 1:length(missing_HPO_terms_on_new_branch)){
+  nn = names(missing_HPO_terms_on_new_branch[i]) # code of grandchild
+  np = mhtp$ProposedParentCode[grep(nn, 
+                                    mhtp$ProposedCode,
+                                    fixed = TRUE)] # codes of parents
+  gp = missing_HPO_ancestors[grep(nn,
+                                  names(missing_HPO_ancestors),
+                                  fixed = TRUE)] %>%
+    unlist() %>% unname()# codes of grandchild's ancestors before inputing
+  an = unique(c(gp, np))
+  ai = match(nn, names(missing_HPO_ancestors))
+  missing_HPO_ancestors[[ai]] <- an
+}
+
+# in case of grand child, add grandparent
+for(i in 1:length(missing_HPO_ancestors)){
+  if(sum(missing_HPO_codes %in% missing_HPO_ancestors[[i]]) > 0){
+    print(names(missing_HPO_ancestors)[i])
+    # add ancestors of missing_HPO_codes
+    mm <- missing_HPO_codes[missing_HPO_codes %in% missing_HPO_ancestors[[i]]]
+    ai <- match(mm, names(missing_HPO_ancestors))
+    ua <- missing_HPO_ancestors[[ai]]
+    missing_HPO_ancestors[[i]] <- unique(c(missing_HPO_ancestors[[i]], ua))
+  }
 }
 
 # logical vector, each entry is false or true, and named with the HPO code
@@ -195,6 +203,3 @@ onto_plot(
   fontsize = 30)
 
 dev.off()
-
-
-

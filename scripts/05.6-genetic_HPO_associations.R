@@ -19,10 +19,11 @@ key_hpo_vec <- rownames(phbm)[grep("^key", rownames(phbm))]
 # association between genetic variants and phenotypes
 
 # setting parameters
-bn <- c("canonicalTNFRSF13B",
-                      "rareTNFRSF13B",
-                      "NFKB1",
-                      "anyPathogenic")
+bn <- c("canonicalTNFRSF13B",       
+        "rareTNFRSF13B",
+        "NFKB1",
+        "anyOtherPathogenic",
+        "anyPathogenic")
 
 # result p values list
 p_list <- list()

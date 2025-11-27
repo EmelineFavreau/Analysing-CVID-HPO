@@ -2,14 +2,17 @@
 source("common.R")
 
 ######################## import input ##########################################
-
+# cols: name,cluster,patient_number,cluster_proportion,long_name,category
 cluster_demographics <- fread("../result/cluster_demographics.csv")
+
+# cols:cluster,biological_category,patient_count,
+# total_patient_in_biological_measure,percentage_in_biological_measure,
+# biological_measure,BH_adjust_pvalue
 cr <- fread( "../result/cluster_biomarker_tests_ratio_pvalue.csv") 
 
 
 ############# Fig5 ############################################################
-cluster_demographics$long_name[cluster_demographics$name == 
-                                 "anyPathogenic"] <- "anyPathogenic"
+
 
 cr <- cr %>% dplyr::filter(biological_measure %in% c("smb",
                                                "cd21",
@@ -90,13 +93,13 @@ Fig5 <- ggplot(Fig5data,
                               "CD21low high" = expression("CD21"^lo),
                               "CD21low normal" = expression("CD211"^norm),
                               "NFKB1" = "NFKB1",
-                              "anyPathogenic" = "Any Pathogenic Variant",
+                              "any Pathogenic" = "Any Pathogenic Variant",
                               "SmB+" = "smB+",
                               "SmB-"  = "smB-" ,
                               "CD21low high" = expression("CD21"^lo),
                               "CD21low normal" = expression("CD211"^norm),
                               "NFKB1" = "NFKB1",
-                              "anyPathogenic" = "Any Pathogenic Variant")) +
+                              "any Pathogenic" = "Any Pathogenic Variant")) +
   ylab("Proportion of patients within the cluster") +
   xlab("") +
   coord_flip() + 

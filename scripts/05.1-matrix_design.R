@@ -73,20 +73,19 @@ phenotype_df <- nbr %>%
     llh = dplyr::if_else(Immuno_group == "lowIgGlowIgAhighIgM",
                                 1L, 0L, missing = 0L),
     canonicalTNFRSF13B = dplyr::if_else(Genetic_variant %in% 
-                                c("anyPathogeniccanonicalTNFRSF13B",
-                                  "anyPathogenicNFKB1canonicalTNFRSF13B",
-                                  "canonicalTNFRSF13B"),
+                                c("canonicalTNFRSF13B"),
                                 1L, 0L, missing = 0L),
     rareTNFRSF13B = dplyr::if_else(Genetic_variant ==
-                            "anyPathogenicrareTNFRSF13B",
+                            "rareTNFRSF13B",
                             1L, 0L, missing = 0L),
     NFKB1 = dplyr::if_else(Genetic_variant %in% 
-                             c("NFKB1",
-                               "anyPathogenicNFKB1canonicalTNFRSF13B",
-                               "anyPathogenicNFKB1"),
+                             c("NFKB1"),
                            1L, 0L, missing = 0L),
+    anyOtherPathogenic = dplyr::if_else(Genetic_variant %in% 
+                                     c("anyOtherPathogenic"),
+                                   1L, 0L, missing = 0L),
     anyPathogenic = dplyr::if_else(!is.na(Genetic_variant),
-                                   1L, 0L),
+                                        1L, 0L, missing = 0L),
   infection_cluster = as.integer(STUDY_ID %in% infection_cluster$STUDY_ID),
   complex_cluster   = as.integer(STUDY_ID %in% complex_cluster$STUDY_ID),
   keyHPOinfection   = as.integer(STUDY_ID %in% khip$kkk),

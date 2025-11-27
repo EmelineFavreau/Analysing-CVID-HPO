@@ -125,13 +125,15 @@ ig_size <- c(lll_cohort_size, lln_cohort_size,
 
 ######################### Any pathogenic #######################################
 
-# assign anypathogenic to records with a diagnosis gene
+# assign anyOtherPathogenic to records with a diagnosis gene
 t <- nbr %>% 
   dplyr::filter(!is.na(Genetic_variant) | !is.na(`Diagnosis gene`)) %>% 
   dplyr::select(c(STUDY_ID, Genetic_variant, `Diagnosis gene`))
 
+t <- t %>% dplyr::filter(!`Diagnosis gene` == "no genotype")
+
 nbr$Genetic_variant[nbr$STUDY_ID %in% t$STUDY_ID[is.na(t$Genetic_variant)]] <-
-  "anyPathogenic"
+  "anyOtherPathogenic"
 
 # Number of patients in each subcategory of genetic variants 
 # (IUIS genes with frequencies of variants)
@@ -145,7 +147,7 @@ diagnosed_cohort_prop <- (diagnosed_cohort_size/cohort_size)*100
 # subset, size, proportion of records with any diagnostic variant
 # (no NFKB1, no TNFRSF13B)
 any_diagnosis_cohort_size <- unname(table(nbr$Genetic_variant)[
-  names(table(nbr$Genetic_variant)) == "anyPathogenic"])
+  names(table(nbr$Genetic_variant)) == "anyOtherPathogenic"])
 
 any_diagnosis_cohort_prop <- 
   round((any_diagnosis_cohort_size/diagnosed_cohort_size)*100, 2)
@@ -187,24 +189,15 @@ rare_TNFRSF13B_sequenced_cohort_prop <-
   round((rare_TNFRSF13B_cohort_size/sequenced_cohort_size)*100, 2)
 
 
-can_rare_TNFRSF13B_cohort_size <- 
-  sum(table(nbr$Genetic_variant)[grep("NFKB1canonicalTNFRSF13B",
-                                    names(table(nbr$Genetic_variant)))])
-can_rare_TNFRSF13B_cohort_prop <- 
-  round((can_rare_TNFRSF13B_cohort_size/diagnosed_cohort_size)*100, 2)
-
-can_rare_TNFRSF13B_sequenced_cohort_prop <- 
-  round((can_rare_TNFRSF13B_cohort_size/sequenced_cohort_size)*100, 2)
-
 ######################### Summarise ############################################
 # putting all descriptive data together
 biological_measure <- c("CD21", "CD21",
                "SmB", "SmB", "Tr","Tr",
                rep("Ig", 4),
-               rep("Variants", 5))
+               rep("Variants", 4))
 biological_category <- c(rep("B cell", 6),
      rep("immunoglobulin", 4),
-     rep("Genotype", 5))
+     rep("Genotype", 4))
 
 biological_level <- c("expansion of low CD21", "CD21 normal",
               "SmB minus", "SmB plus", "Transitional B normal",
@@ -213,7 +206,6 @@ biological_level <- c("expansion of low CD21", "CD21 normal",
               "NFKB1",
               "canonical_TNFRSF13B",
               "rare_TNFRSF13B", 
-              "NFKB1canonicalTNFRSF13B",
               "any_other_diagnosis_variant")
 
 number_of_patients <- c(cd21low_cohort_size,
@@ -226,7 +218,6 @@ number_of_patients <- c(cd21low_cohort_size,
            NFKB1_cohort_size,
            canonical_TNFRSF13B_cohort_size,
            rare_TNFRSF13B_cohort_size,
-           can_rare_TNFRSF13B_cohort_size,
            any_diagnosis_cohort_size)
 
 prop_of_patients <- c(cd21low_cohort_prop,
@@ -242,7 +233,6 @@ prop_of_patients <- c(cd21low_cohort_prop,
                        NFKB1_cohort_prop,
                        canonical_TNFRSF13B_cohort_prop,
                        rare_TNFRSF13B_cohort_prop,
-                       can_rare_TNFRSF13B_cohort_prop,
                        any_diagnosis_cohort_prop)
 
 # plots will be bar plot, % will be in captions.
@@ -279,11 +269,10 @@ c(NFKB1_cohort_size, NFKB1_cohort_prop, NFKB1_sequenced_cohort_prop)
 c(canonical_TNFRSF13B_cohort_size,
   canonical_TNFRSF13B_sequenced_cohort_prop)
 
-#the rare form, and both. 
+#the rare form
 c(rare_TNFRSF13B_cohort_size,
   rare_TNFRSF13B_sequenced_cohort_prop)
-c(can_rare_TNFRSF13B_cohort_size,
-  can_rare_TNFRSF13B_sequenced_cohort_prop)
+
 
 # variants in genes other than NFKB1 or TNFRSF13B.  
 c(any_diagnosis_cohort_size,

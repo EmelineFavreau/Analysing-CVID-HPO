@@ -13,7 +13,11 @@ complex_cluster <- fread("../result/complexPatients.csv")
 # clinical lab label
 LC <- fread("../input/HPO_freq_name_labORclinical_LC.csv")
 ####### Cluster Demographics ############################################
-
+genetic_groups <- c("canonicalTNFRSF13B",       
+                    "rareTNFRSF13B",
+                    "NFKB1",
+                    "anyOtherPathogenic",
+                    "anyPathogenic")
 # count the number of patients
 mat_long <- matrix(data = 0, ncol = 3)
 for (cl in c("infection_cluster", "complex_cluster")){
@@ -21,10 +25,7 @@ for (cl in c("infection_cluster", "complex_cluster")){
                 "cd21_low", "cd21_plus",
                 "tr_norm","tr_high",
                 "llh", "lln", "lll", "lnl",
-                "canonicalTNFRSF13B",
-                "rareTNFRSF13B", 
-                "NFKB1",
-                "anyPathogenic")){
+                genetic_groups)){
     i <- c(cl, bio)
     id <- phbm[row.names(phbm) %in% i, ]
     s <- sum(colSums(id) == 2) 
@@ -69,8 +70,7 @@ trait_vec <- c("smb_normal", "smb_minus",
                "cd21_low", "cd21_plus",
                "tr_norm", "tr_high",
                "llh", "lln", "lll", "lnl",
-               "canonicalTNFRSF13B", "rareTNFRSF13B", "NFKB1",
-               "any Pathogenic variant", 
+               genetic_groups, 
                "smb_normal & tr_high", "smb_normal & tr_norm")
 names(trait_vec) <- c("SmB+", "SmB-",
                       "CD21low high", "CD21low normal",
@@ -78,7 +78,7 @@ names(trait_vec) <- c("SmB+", "SmB-",
                       "lowIgG-lowIgA-highIgM", "lowIgG-lowIgA-normalIgM",
                       "lowIgG-lowIgA-lowIgM", "lowIgG-normalIgA-lowIgM",
                       "canonical TNFRSF13B", "rare TNFRSF13B", "NFKB1",
-                      "anyPathogenic",
+                      "any other Pathogenic", "any Pathogenic",
                       "SmB+ & Transitional B high", "SmB+ & Transitional B normal")
 # readable name
 cdem$long_name <- names(trait_vec)[match(cdem$name, trait_vec)]
@@ -90,8 +90,7 @@ cdem$cluster <- gsub(pattern = "_cluster",
 
 # split between bio and gene
 cdem$category <- "phenotype"
-i <- c("anyPathogenic","NFKB1","rareTNFRSF13B","canonicalTNFRSF13B" )
-cdem$category[cdem$name %in% i] <- "genotype"
+cdem$category[cdem$name %in% genetic_groups] <- "genotype"
 
 
 # HPO frequency in infection/complex cohort

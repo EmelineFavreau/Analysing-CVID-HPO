@@ -97,18 +97,18 @@ keys=list(infection = as.vector(unname(hpo$name[names(hpo$name) %in%
 
 # list of 7 key phenotypes, 
 # each with a vector of clinical names for associated HPOs
-keys=lapply(keys, intersect, rownames(z))
+keys <- lapply(keys, intersect, rownames(z))
 
 # matrix of presence/absence of HPOs (row) per patient (column)
-newz=lapply(seq_along(keys), function(i) {
+newz <- lapply(seq_along(keys), function(i) {
   apply(z[keys[[i]],,drop=FALSE], 2, max)}) %>% do.call("rbind",.)
 
 # name the rows with the key phenotypes
-rownames(newz)=names(keys)
+rownames(newz) <- names(keys)
 
 # restrict to patients with 1+ key term 
 # to construct distances between them
-newz = newz[, colSums(newz)>0]
+newz <- newz[, colSums(newz)>0]
 
 # list of patients for each HPO group:
 key_vec <- c("infection",

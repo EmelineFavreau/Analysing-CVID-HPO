@@ -37,7 +37,10 @@ hpo_names <- list(
   c("Autoimmunity", "Vitiligo", "Hashimoto thyroiditis",
     "Atrophic gastritis", "Malabsorption of Vitamin B12",
     "Type I diabetes mellitus", "Autoimmune hypoparathyroidism",
-    "Billiary cirrhosis"),
+    "Billiary cirrhosis",
+    "Autoimmune hemolytic anemia",
+    "Autoimmune thrombocytopenia",
+    "Neutropenia in presence of anti-neutropil antibodies"),
   # .... of which are Autoimmune cytopaenias
   c("Autoimmune hemolytic anemia",
     "Autoimmune thrombocytopenia",
@@ -82,7 +85,7 @@ no_yob_centre <- nbr[is.na(nbr$year_of_birth), c("STUDY_ID","CENTRE")]
 num_no_yob_record <- sum(is.na(nbr$year_of_birth))
 
 # make the table
-epidemiologic_data_table <- data.frame(
+edt <- data.frame(
   Number_of_Records = c(nbr %>% dplyr::filter(!is.na(SEX)) %>% nrow(),
                         nbr %>% dplyr::filter(!is.na(year_of_birth)) %>% nrow(),
                         counts),
@@ -111,5 +114,14 @@ epidemiologic_data_table <- data.frame(
                   
 )
 
+# calculate subset for Autoimmune cytopaenias out of Autoimmunity
+sh <- ".... of which are Autoimmune cytopaenias, %"
+hh <- "Autoimmunity, %"
+updated_perc <- edt$Number_of_Records[rownames(edt) == sh]/
+  edt$Number_of_Records[rownames(edt) == hh]
+edt$Clinical_data[rownames(edt) == sh] <- 
+  paste(round((updated_perc) * 100, 1), "%", sep = "")
+
+
 # save table
-write.csv(epidemiologic_data_table, "../result/Table1/epidemiologic_data_table.csv")
+write.csv(edt, "../result/Table1/epidemiologic_data_table.csv")

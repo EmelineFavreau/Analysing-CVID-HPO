@@ -17,15 +17,19 @@ bat <- br %>%
                                 "keyHPOsplenomegaly")) %>% 
   dplyr::select(-c(biological_measure))
 
+
 gat <- gr %>% 
   dplyr::select(-c(biological_measure)) %>% 
-  dplyr::filter(HPO_code %in% c("HP:0001287",
-                                "HP:0001904",
-                                "HP:0002730",
-                                "HP:0006527")) 
+  dplyr::filter(HPO_code %in% c("HP:0001890", # Autoimmune hemolytic anemia
+                                "HP:0005401",#Recurrent candida infections
+                                "HP:0001904", # Autoimmune neutropenia /Neutropenia in presence of anti-neutropil antibodies
+                                "HP:0001973"))  # Autoimmune thrombocytopenia 
+
+
 iat <- ir %>% 
   dplyr::select(-c(biological_measure)) %>% 
-  dplyr::filter(HPO_code %in% c("HP:0033582","HP:0410301"))
+  dplyr::filter(HPO_code %in% c("HP:0033582", # Pulmonary interstitial lymphocyte infiltration
+                                "HP:0410301")) # Partial absence of specific antibody response to unconjugated pneumococcus vaccine 
 
 ############ save all
 ig_cohort_size <- 500

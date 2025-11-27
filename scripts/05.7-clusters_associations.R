@@ -104,25 +104,22 @@ for(k in 1:length(bn)){
 
 # PART 2: Ig and genetics and key HPO groups
 # setting parameters
+genetic <- c("canonicalTNFRSF13B",       
+              "rareTNFRSF13B",
+              "NFKB1",
+              "anyOtherPathogenic",
+              "anyPathogenic")
 bn <- c("lowIgGlowIgAhighIgM",
-                      "lowIgGlowIgAnormalIgM", 
-                      "lowIgGlowIgAlowIgM",
-                      "lowIgGnormalIgAlowIgM",
-                      "canonicalTNFRSF13B",
-                      "rareTNFRSF13B",
-                      "NFKB1", 
-                      "anyPathogenic",
-                      key_hpo_vec)
+        "lowIgGlowIgAnormalIgM", 
+        "lowIgGlowIgAlowIgM",
+        "lowIgGnormalIgAlowIgM",
+        genetic, key_hpo_vec)
 
 bc <- c("llh",
-                    "lln",
-                    "lll",
-                    "lnl",
-                    "canonicalTNFRSF13B",
-                    "rareTNFRSF13B",
-                    "NFKB1",
-                    "anyPathogenic",
-                    key_hpo_vec)
+        "lln",
+        "lll",
+        "lnl",
+        genetic, key_hpo_vec)
 
 names(bc) <- bn
 
@@ -182,7 +179,6 @@ for(k in 1:length(bn)){
   for(c in names(centres_vec)){
     if(sum(mat_long[,4][mat_long[,3] == c][1:2] == 0) == 2 |
        sum(mat_long[,4][mat_long[,3] == c][3:4] == 0) == 2){
-      #print("the patients in this centre present no variation for this hpo") 
       mat_long <- mat_long[mat_long[,3] !=c, ]}
   }
   
@@ -263,12 +259,12 @@ c1$percentage_in_biological_measure <-
   (c1$patient_count/c1$total_patient_in_biological_measure)*100
 
 c1$biological_measure <- ifelse(grepl("_", c1$biological_category), 
-                                gsub(pattern = "_.*", c1$biological_category, replacement = ""),
-                                gsub(pattern = "^no", c1$biological_category, replacement = ""))
+            gsub(pattern = "_.*", c1$biological_category, replacement = ""),
+            gsub(pattern = "^no", c1$biological_category, replacement = ""))
 
 # merge info
 merged_tibble <- c1 %>%
-  full_join(BH_cluster_CHM_table, by ="biological_measure")
+  full_join(BH_cluster_CHM_table, by = "biological_measure")
 
 ############## save all
 fwrite(merged_tibble, "../result/cluster_biomarker_tests_ratio_pvalue.csv")
