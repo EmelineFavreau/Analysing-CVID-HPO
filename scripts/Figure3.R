@@ -82,20 +82,20 @@ p_main <- final_long_df %>%
                      fill = as.factor(Presence))) +
   geom_tile(color = "white") +
   facet_grid( . ~ InfectionComplex, 
-    scales = "free", 
-    space = "free") +
-  scale_fill_manual(
-    values = presAbsvalues,
-    labels = c("Absent", "Present"),
-    name = "") +
-  theme(
-    panel.grid = element_blank(),
-    axis.text.x = element_blank(), 
-    axis.ticks.x = element_blank(),
-    strip.background = element_rect(fill = "grey85", color = NA),
-    strip.text = element_text(face = "bold"),
-    legend.position = "bottom" 
-  ) +
+            scales = "free", 
+            space = "free") +
+  scale_fill_manual(values = presAbsvalues,
+                    labels = c("Absent", "Present"),
+                    name = "") +
+  theme(panel.grid       = element_blank(),
+        axis.text.x      = element_blank(), 
+        axis.ticks.x     = element_blank(),
+        strip.background = element_rect(fill = "grey85", color = NA),
+        strip.text       = element_text(size = 6, family = "Times"),
+        legend.position  = "bottom",
+        text             = element_text(size = 8, family = "Times"),
+        axis.text        = element_text(size = 8, family = "Times"),
+        legend.key.size  = unit(0.2, "cm")) +
   labs(x = "", y = "Patient") + 
   coord_flip()
 
@@ -108,19 +108,23 @@ plot_data_right <- final_long_df %>%
 
 p_right <- ggplot(plot_data_right, 
                   aes(x = HPO_term, y = Count)) +
-  geom_bar(stat = "identity", fill = "grey50", show.legend = FALSE) +
+  geom_bar(stat = "identity",
+           fill = "grey50",
+           show.legend = FALSE) +
   coord_flip() + 
   labs(x = "", y = "Total Count") +
+  scale_y_continuous(breaks = c(0, 100, 200))+
   theme_minimal() + 
-  theme(
-    panel.grid = element_blank(),
-    strip.text.y = element_blank(), 
-    strip.background = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-   panel.grid.major.x = element_line(color = "lightgrey",
-                                     linewidth = 0.2,
-                                     linetype = 2))
+  theme(panel.grid         = element_blank(),
+        strip.text.y       = element_blank(), 
+        strip.background   = element_blank(),
+        axis.text.y        = element_blank(),
+        axis.ticks.y       = element_blank(),
+        panel.grid.major.x = element_line(color = "lightgrey",
+                                         linewidth = 0.2,
+                                         linetype = 2),
+        text               = element_text(size = 8, family = "Times"),
+        axis.text          = element_text(size = 7, family = "Times"))
 
 
 Fig3 <- p_main + p_right +
@@ -129,10 +133,11 @@ Fig3 <- p_main + p_right +
 
 ############# Layout ###########################################################
 Fig3
-ggsave(paste("../result/", figname, "/", figname, ".jpeg", sep = ""),
-        width = 25,
-        height = 20,
-        units = "cm")
+ggsave(paste("../result/", figname, "/", figname, ".tiff", sep = ""),
+              width = 6,
+              height = 4,
+              units = "in",
+              dpi = 1000)
 
 ############# Legend details ###################################################
 # number of patients

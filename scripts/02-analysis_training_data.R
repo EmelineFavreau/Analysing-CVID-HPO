@@ -105,7 +105,7 @@ sim_mat[lower.tri(sim_mat, diag = T)] <- NA
 # row names have anonymised clinicians names
 rownames(sim_mat) <- 1:10
 
-fwrite(sim_mat, "../result/Fig1/sim_mat.csv")
+
 
 
 ######################## HPO Similarity HPO pre/post training ##################
@@ -162,7 +162,7 @@ before_record_vec <- num_hpo_compL %>% dplyr::filter(Timepoint == "before") %>%
   dplyr::select(Records) %>% unlist() 
 ks.test(before_record_vec, after_record_vec) # p-value < 2.2e-16
 
-fwrite(num_hpo_compL, "../result/Fig1/num_hpo_compL.csv")
+
 
 
 
@@ -232,8 +232,55 @@ num_hpo_comp$differential <- num_hpo_comp$num_hpo_after -
 index <- match(num_hpo_comp$STUDY_ID, common_STUDY_ID_vec)
 num_hpo_comp$before_after_similarity_value <- similarity_value_vec[index]
 
+
+################ Pre and Post HPO depth per patient
+# pre-training, patient A had 4 unique HPO traits,
+# none of them is a direct child of each other. 
+#Post-training, patient A has 8 unique HPO traits, 
+# and the 4 new ones are a direct child of the pre-training set. 
+for(tt in seq(1, length(term_sets), by = 2)){
+  patient <- names(term_sets[tt]) %>% 
+    gsub(pattern = "_before", ., replacement = "")
+  print(patient)
+  before <- unlist(term_sets[tt])
+  after <- unlist(term_sets[tt+1])
+  for(i in before){
+    # pre training hpo that are not self
+    j = before[before != i]
+    # j includes any children of i?
+    ci = j[j %in% (hpo$children[names(hpo$children) == i] %>% unlist())]
+    if(length(ci) > 0){
+      print(paste(i, "has", length(ci), "hpo child in pre-training"))
+    }
+    
+  }
+  for(i in after){
+    # post training hpo that are not self
+    j = after[after != i]
+    # children of i
+    ci = hpo$children[names(hpo$children) == i]%>% unlist() %>% unname()
+    # not self are children of i
+    cij = j[j %in% ci]
+    if(length(cij) > 0){
+      print(paste(i, "has", length(cij), "hpo child in post-training"))
+    }
+  }
+}
+
+
+au = "HP:0002960"
+aha = "HP:0001890"
+au_STUDY = names(term_sets)[sapply(term_sets, function(x) au %in% x)] 
+aha_STUDY = names(term_sets)[sapply(term_sets, function(x) aha %in% x)] 
+
+
+######## save all
+
+
 nrow(num_hpo_comp)# for main text
 sum(num_hpo_comp$differential < 0)# for main text
 summary(num_hpo_comp$differential[num_hpo_comp$differential >0])# for main text
+fwrite(sim_mat, "../result/Fig1/sim_mat.csv")
+fwrite(num_hpo_compL, "../result/Fig1/num_hpo_compL.csv")
 fwrite(num_hpo_comp, "../result/Fig1/num_hpo_comp.csv")
 

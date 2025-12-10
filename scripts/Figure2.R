@@ -81,16 +81,22 @@ Fig2A <- df2 %>%
       round(groupPerc, 1),
       "%")),
     position = position_dodge(0.9),
-    size = 3,
-    vjust = -0.5 )+
+    size = 2, family = "Times",
+    vjust = -0.5 ) +
   ylab("Number of patients") +
   theme(axis.title.x = element_blank()) +
   theme(legend.position = "bottom",
         legend.direction = "horizontal",
         legend.box = "horizontal",
-        legend.text = element_text(size=8)) +
+        legend.text = element_text(size = 6, family = "Times"),
+        text = element_text(size = 6, family = "Times"),
+        axis.text = element_text(size = 6, family = "Times"),
+        legend.key.size = unit(0.2, "cm"),                     
+        legend.spacing.y = unit(0.05, "cm"),
+        legend.margin = margin(t = 0.05, r = 0, b = 0.1, l = 0, unit = "cm")) +
   scale_fill_manual(name = "",
                     values = Bcellcol,
+                    
                     labels = c("expansion of low CD21" = expression(CD21^norm),
                                "CD21 normal" = expression(CD21^low),
                                "SmB minus" = "smB-",
@@ -191,14 +197,15 @@ Fig2B <- ggplot(Fig2Bplot_data,
   geom_text(aes(label = sprintf("%.1f%%", percentage_within_study)),
     position = position_dodge(width = 0.9),
     vjust = -0.5,
-    size = 3) +
+    size = 1.5, family = "Times") +
   geom_bracket(data = stats_summary,
     inherit.aes = FALSE,
     aes(xmin = xmin,
         xmax = xmax,
         y.position = y.position,
         label = label),
-    label.size = 3) +
+    label.size = 2,
+    family = "Times") +
   scale_fill_manual(values = all_colors,
                     labels = all_labels,
                     name = "",
@@ -212,9 +219,19 @@ Fig2B <- ggplot(Fig2Bplot_data,
                       "smB-CD21\nEUROClass" = "EUROClass",
                       "smB-Tr\nEUROClass"   = "EUROClass")) +
   labs(y = "Number of patients") +
-  theme(axis.title.x   = element_blank(),
+  theme(axis.title.x    = element_blank(),
         legend.position = "bottom",
-        legend.text     = element_text(size = 8)) +
+        text            = element_text(size = 5, family = "Times"),
+        axis.text       = element_text(size = 6, family = "Times"),
+        legend.text = element_text(size = 6, family = "Times"), 
+        legend.key.size = unit(0.2, "cm"),                     
+        legend.spacing.y = unit(0.05, "cm"),
+        legend.margin = margin(t = 0.05,
+                               r = 0,
+                               b = 0.1,
+                               l = 0,
+                               unit = "cm"),
+        plot.margin = unit(c(0.01,0.01,0.01,0.01), "cm")) +
   guides(fill = guide_legend(nrow = 2)) 
 
 
@@ -226,12 +243,16 @@ bottompatch <- Fig2B
 
 patchwork1 <-  toppatch / bottompatch
 
-patchwork1 + plot_annotation(tag_levels = 'a')
+patchwork1 + plot_annotation(tag_levels = 'a') &
+                             theme(text = element_text(size = 8,
+                                                       family = "Times"),
+                                   plot.margin = unit(c(0.01,0.01,0.01,0.01), "cm"))
 
-ggsave("../result/Fig2/Fig2.jpeg",
-       width = 15,
-       height = 15,
-       units = "cm")
+ggsave("../result/Fig2/Fig2.tiff",
+              width = 3,
+              height = 4,
+              units = "in",
+              dpi = 1000)
 
 ############# Legend details ###################################################
 #chsqr

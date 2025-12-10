@@ -76,13 +76,17 @@ Fig5 <- ggplot(Fig5data,
       label = p_label),
     inherit.aes = FALSE, 
     vjust = 0,       
-    hjust = -0.5) +
+    hjust = -0.5,
+    size = 2,
+    family = "Times") +
   geom_bracket(
     data = bracket_data,
     aes(xmin = xmin,
       xmax = xmax,
       y.position = y.position,
       label = label),
+    label.size = 2,
+    family = "Times",
     inherit.aes = FALSE,
     tip.length = 0.015,
     vjust = 3,
@@ -99,19 +103,36 @@ Fig5 <- ggplot(Fig5data,
                               "CD21low high" = expression("CD21"^lo),
                               "CD21low normal" = expression("CD211"^norm),
                               "NFKB1" = "NFKB1",
-                              "any Pathogenic" = "Any Pathogenic Variant")) +
+                              "any Pathogenic" = "         Any\nPathogenic\n    Variant")) +
   ylab("Proportion of patients within the cluster") +
   xlab("") +
   coord_flip() + 
   theme_bw() +
+  theme(text = element_text(size = 7, family = "Times"),
+        axis.text  = element_text(size = 7, family = "Times"),
+        axis.text.y = element_text(hjust = 1),
+        legend.key.size = unit(0.2, "cm"),
+        legend.title    = element_blank(),
+        legend.position = "inside",
+        legend.position.inside = c(0.9, 0.03),
+        legend.spacing.y = unit(0.05, "cm"),
+        legend.margin = margin(t = 0.01,
+                               r = 0.01,
+                               b = 0.01,
+                               l = 0.01,
+                               unit = "cm"),
+        legend.background = element_rect(fill="white",
+                                         size=0.1, linetype="solid", 
+                                         colour ="black")) +
   ylim(c(0, 45)) 
 
 ############# Layout ###########################################################
 Fig5 
-ggsave("../result/Fig5/Fig5.jpeg",
-       width = 15,
-       height = 10,
-       units = "cm")
+ggsave("../result/Fig5/Fig5.tiff",
+       width = 3,
+       height = 3.3,
+       units = "in",
+       dpi = 1000)
 
 ############# Legend details ###################################################
 

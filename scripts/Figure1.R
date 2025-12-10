@@ -25,7 +25,7 @@ Fig1A <- ggplot(df, aes(x = x,
                fill = `Semantic Similarity`)) +
   geom_tile(color = "white") +
   geom_text(aes(label = `Semantic Similarity`),
-            color = "black", size = 3) +
+            color = "black", size = 2) +
   scale_fill_gradientn(
     colours = RdYlBu_pal,
     na.value = "white",
@@ -34,6 +34,10 @@ Fig1A <- ggplot(df, aes(x = x,
     labels = c("Not similar", "Very similar")) +
   coord_fixed() +
   theme_minimal() +
+  theme(text = element_text(size = 8,
+                            family = "Times")) +
+  theme(legend.text = element_text(size = 8)) +
+  theme(axis.text = element_text(size = 8))+
   theme(axis.text.x = element_blank(),
         panel.grid = element_blank(),
         axis.ticks = element_blank(),
@@ -41,7 +45,8 @@ Fig1A <- ggplot(df, aes(x = x,
         legend.position.inside = c(0.95, 0.05),  # Position legend at the bottom-right
         legend.justification = c("right", "top")) +
   labs(x = NULL, y = NULL,
-       fill = "Semantic Similarity")
+       fill = "Semantic Similarity") + 
+  theme(plot.background = element_rect(fill = 'white', colour = 'white'))
 
 
 
@@ -59,6 +64,9 @@ Fig1B <- ggplot(num_hpo_compL,
   labs(x = "",
        y = "Number of HPOs per patient") +
   scale_fill_manual(values = training_colours) +
+  theme(text = element_text(size = 8,
+                            family = "Times")) +
+  theme(axis.text = element_text(size = 8))+
   theme(legend.position = "none") +
   scale_x_discrete(limits = c("Pre-Training","Post-Training"))
 
@@ -81,7 +89,10 @@ Fig1C <- ggplot(num_hpo_comp,
   geom_density_2d_filled(alpha = 0.5) +
   scale_x_continuous(breaks = c(0.25, 0.5, 0.75, 1),
                      limits = c(0.2, 1.1)) + 
-  ylim(c(-20, 33)) + theme(legend.position = "none")
+  ylim(c(-20, 33)) + 
+  theme(text = element_text(size = 8, family = "Times"),
+        axis.text = element_text(size = 8),
+        legend.position = "none")
 
 
 ############# Layout ###########################################################
@@ -90,15 +101,21 @@ Fig1C <- ggplot(num_hpo_comp,
 plots <- cowplot::align_plots(Fig1A, Fig1B,
                               align = 'v', axis = 'l')
 bottom_row <- cowplot::plot_grid(plots[[2]], Fig1C,
-                                 labels = c('b', 'c'), label_size = 12)
+                                 labels = c('b', 'c'),
+                                 label_size = 8,
+                                 label_fontfamily = "Times")
 Fig1 <- cowplot::plot_grid(plots[[1]], bottom_row, 
-                           labels = c('a', ''), label_size = 12, ncol = 1)
+                           labels = c('a', ''),
+                           label_size = 8,
+                           label_fontfamily = "Times",
+                           ncol = 1)
 
 
-ggsave("../result/Fig1/Fig1.jpeg",
-       width = 20,
-       height = 20,
-       units = "cm")
+ggsave("../result/Fig1/Fig1.tiff",
+       width = 6,
+       height = 4,
+       units = "in",
+       dpi = 1000)
 
 ############# Legend details ###################################################
 summary(num_hpo_compL$Records[num_hpo_compL$Timepoint == "Post-Training"])

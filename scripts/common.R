@@ -35,11 +35,13 @@ library(uwot)
 hpo <- get_OBO("../input/hp.obo",
                merge_equivalent_terms = FALSE) 
 
-
-theme_set(theme_bw()) +
-  theme(text = element_text(size = 12)) +
-  theme(legend.text = element_text(size = 12)) +
-  theme(axis.text = element_text(size = 12))
+# JACI: 1000 dpi, Times New Roman, eps
+# 3″ wide by 4″ high for 1/4 page: Fig5, Fig2
+# 6″ wide by 4″ high for 1/2 page: Fig3, Fig4, Fig1, Fig6
+theme_set(theme_bw()) 
+  # theme(text = element_text(size = 12, family = "Times")) +
+  # theme(legend.text = element_text(size = 12)) +
+  # theme(axis.text = element_text(size = 12))
 
 centres_vec <- c(
   CUH      = "Cambridge University Hospitals",
