@@ -105,11 +105,13 @@ p_main <- final_long_df %>%
         axis.ticks.x     = element_blank(),
         strip.background = element_rect(fill = "grey85", color = NA),
         strip.text       = element_text(size = 6, family = "Times"),
-        legend.position  = "bottom",
-        text             = element_text(size = 6, family = "Times"),
-        axis.text        = element_text(size = 6, family = "Times"),
+        legend.position = c(-0.99, 0.05),
+        text             = element_text(size = 8, family = "Times"),
+        axis.text        = element_text(size = 8, family = "Times"),
         legend.key.size  = unit(0.2, "cm"),
-        legend.text      = element_text(size=7)) +
+        legend.text      = element_text(size = 8 , family = "Times"),
+        legend.margin = margin(t = 0.01, r = 0.1, b = 0.1, l = 0.1, unit = "cm"),
+        plot.margin = grid::unit(c(0.1, 0.1, 0.1, 0.1), "mm"))  +
   labs(x = "", y = "Patient") + 
   coord_flip()
 
@@ -140,17 +142,19 @@ p_right <- ggplot(plot_data_right,
                                           linewidth = 0.2,
                                           linetype = 2),
         text               = element_text(size = 8, family = "Times"),
-        axis.text          = element_text(size = 7, family = "Times"))
+        axis.text          = element_text(size = 8, family = "Times"))
 
 
-Fig4 <- p_main + p_right +
-  plot_layout(widths = c(3, 1))
+Fig4 <- p_main + 
+  p_right +
+  plot_layout(widths = c(5, 1)) &
+  theme(plot.margin = unit(c(0, 0, 0, 0), "pt"))
 
 ############# Layout ###########################################################
 Fig4
 ggsave(paste("../result/", figname, "/", figname, ".tiff", sep = ""),
-       width = 6,
-       height = 4,
+       width = 7,
+       height = 4.5,
        units = "in",
        dpi = 1000)
 

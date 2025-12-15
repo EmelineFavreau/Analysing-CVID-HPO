@@ -78,23 +78,28 @@ p$CENTRE <- nbr$CENTRE[match(rownames(p), nbr$STUDY_ID)]
 
 # plots
 left <- ggplot(p,
-            aes(x=PC1, y=PC2, col=cluster)) +
+            aes(x = PC1, y = PC2, col = cluster)) +
   geom_point(size = 0.7) + 
   scale_colour_manual(values = infComp) +
   theme(text            = element_text(size = 8, family = "Times"),
         axis.text       = element_text(size = 8, family = "Times"),
         legend.key.size = unit(0.2, "cm"),
         legend.title    = element_blank(),
-        legend.position = "inside",
-        legend.position.inside = c(0.9, 0.2),
-        legend.background = element_rect(fill="white",
-                                         size=0.1,
-                                         linetype="solid", 
-                                         colour ="black")) 
+        legend.justification.right = "left",
+        legend.text     = element_text(size = 8, family = "Times"),
+  plot.margin = grid::unit(c(0.3, 0.3, 0.3, 0.3), "mm"))
 
-right <- ggplot(p, aes(x = PC1,
-                       y = PC2,
-                       col = CENTRE,
+#,
+        # legend.position = "inside",
+        # legend.position.inside = c(0.9, 0.2),
+        # legend.background = element_rect(fill="white",
+        #                                  size=0.1,
+        #                                  linetype="solid", 
+        #                                  colour ="black")) 
+
+right <- ggplot(p, aes(x     = PC1,
+                       y     = PC2,
+                       col   = CENTRE,
                        shape = CENTRE)) +
     geom_point() +
   scale_fill_manual(values = centrescol) +
@@ -102,8 +107,10 @@ right <- ggplot(p, aes(x = PC1,
     scale_shape_manual(values = c(1:11)) +
   theme(text            = element_text(size = 8, family = "Times"),
         axis.text       = element_text(size = 8, family = "Times"),
+        legend.text     = element_text(size = 8, family = "Times"),
         legend.title    = element_blank(),
-        legend.key.size = unit(0.2, "cm")) 
+        legend.key.size = unit(0.3, "cm"),
+        plot.margin = grid::unit(c(0.3, 0.3, 0.3, 0.3), "mm"))
 
 
 
@@ -112,10 +119,10 @@ patchwork2 <-  left / right
 patchwork2 + plot_annotation(tag_levels = 'a')
 
 ggsave("../result/Fig6/Fig6.tiff",
-       width = 6,
+       width  = 6,
        height = 4,
-       units = "in",
-       dpi = 1000)
+       units  = "in",
+       dpi    = 1000)
 
 ############# Legend details ###################################################
 t.test(p$PC1 ~ p$cluster)

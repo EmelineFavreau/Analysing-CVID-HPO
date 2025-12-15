@@ -73,38 +73,39 @@ df2 <- data %>%
 
 Fig2A <- df2 %>% 
   ggplot(aes(fill = biological_level,
-             y = number_of_patients,
-             x = biological_measure))  + 
+             x = number_of_patients,
+             y = biological_measure))  + 
   geom_bar(position = "dodge", stat = "identity") +
   geom_text(aes(
     label = paste0(
       round(groupPerc, 1),
       "%")),
     position = position_dodge(0.9),
-    size = 2, family = "Times",
-    vjust = -0.5 ) +
-  ylab("Number of patients") +
-  theme(axis.title.x = element_blank()) +
-  theme(legend.position = "bottom",
+    size = 3, family = "Times",
+    vjust = 0.5,
+    hjust = -0.5) +
+  xlab("Number of patients") +
+  theme(axis.title.y = element_blank()) +
+  theme(legend.position = "right",
         legend.direction = "horizontal",
         legend.box = "horizontal",
-        legend.text = element_text(size = 6, family = "Times"),
-        text = element_text(size = 6, family = "Times"),
-        axis.text = element_text(size = 6, family = "Times"),
+        legend.text = element_text(size = 8, family = "Times"),
+        text = element_text(size = 8, family = "Times"),
+        axis.text = element_text(size = 8, family = "Times"),
         legend.key.size = unit(0.2, "cm"),                     
-        legend.spacing.y = unit(0.05, "cm"),
+        #legend.spacing.x = unit(0.05, "cm"),
         legend.margin = margin(t = 0.05, r = 0, b = 0.1, l = 0, unit = "cm")) +
   scale_fill_manual(name = "",
                     values = Bcellcol,
-                    
                     labels = c("expansion of low CD21" = expression(CD21^norm),
                                "CD21 normal" = expression(CD21^low),
                                "SmB minus" = "smB-",
                                "SmB plus" = "smB+",
                                "Transitional B normal" = expression(Tr^norm),
                                "Transitional B high" = expression(Tr^hi))) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))+
-  guides(fill = guide_legend(nrow = 2))
+  scale_x_continuous(expand = expansion(mult = c(0, 0.1)))+
+  guides(fill = guide_legend(ncol = 1)) 
+  
 
 
 
@@ -161,7 +162,7 @@ smBpCD21pv <-Fig2Bplot_data %>%
 
 stats_summary <- tibble(Bcell_group=c("smB+CD21", "smB-CD21","smB-Tr"),  
                         p_value= c(smBpCD21pv,smBCD21pv,smBTrpv),
-                        y.position=c(95, 91, 146),
+                        y.position=c(105, 105, 156),
                         xmin = c("smB+CD21\nINTREPID",
                                  "smB-CD21\nINTREPID",
                                  "smB-Tr\nINTREPID"),
@@ -194,17 +195,18 @@ Fig2B <- ggplot(Fig2Bplot_data,
            y = number_of_patients,
            fill = biological_level)) +
   geom_bar(position = "dodge", stat = "identity") +
-  geom_text(aes(label = sprintf("%.1f%%", percentage_within_study)),
+  geom_text(aes(label = sprintf("%.0f%%", percentage_within_study)),
     position = position_dodge(width = 0.9),
-    vjust = -0.5,
-    size = 1.5, family = "Times") +
+    vjust = 0.5,
+    hjust = -0.2,
+    size = 3, family = "Times") +
   geom_bracket(data = stats_summary,
     inherit.aes = FALSE,
     aes(xmin = xmin,
         xmax = xmax,
         y.position = y.position,
         label = label),
-    label.size = 2,
+    label.size = 3,
     family = "Times") +
   scale_fill_manual(values = all_colors,
                     labels = all_labels,
@@ -218,23 +220,24 @@ Fig2B <- ggplot(Fig2Bplot_data,
                       "smB+CD21\nEUROClass" = "EUROClass",
                       "smB-CD21\nEUROClass" = "EUROClass",
                       "smB-Tr\nEUROClass"   = "EUROClass")) +
-  labs(y = "Number of patients") +
-  theme(axis.title.x    = element_blank(),
-        legend.position = "bottom",
-        text            = element_text(size = 5, family = "Times"),
-        axis.text       = element_text(size = 6, family = "Times"),
-        legend.text = element_text(size = 6, family = "Times"), 
+  theme(axis.title.y    = element_blank(),
+        legend.position = "right",
+        text            = element_text(size = 8, family = "Times"),
+        axis.text       = element_text(size = 8, family = "Times"),
+        legend.text = element_text(size = 8, family = "Times"), 
         legend.key.size = unit(0.2, "cm"),                     
-        legend.spacing.y = unit(0.05, "cm"),
+        #legend.spacing.y = unit(0.05, "cm"),
         legend.margin = margin(t = 0.05,
                                r = 0,
                                b = 0.1,
                                l = 0,
-                               unit = "cm"),
-        plot.margin = unit(c(0.01,0.01,0.01,0.01), "cm")) +
-  guides(fill = guide_legend(nrow = 2)) 
+                               unit = "cm"))+
+        #plot.margin = unit(c(0.01,0.01,0.01,0.01), "cm")) +
+  guides(fill = guide_legend(ncol = 1)) + 
+  coord_flip() +
+  labs(y = "Number of patients") 
 
-
+Fig2B
 ############# Layout ###########################################################
 
 toppatch <- Fig2A
@@ -243,16 +246,18 @@ bottompatch <- Fig2B
 
 patchwork1 <-  toppatch / bottompatch
 
-patchwork1 + plot_annotation(tag_levels = 'a') &
-                             theme(text = element_text(size = 8,
-                                                       family = "Times"),
-                                   plot.margin = unit(c(0.01,0.01,0.01,0.01), "cm"))
+patchwork1 + plot_layout(widths = c(1, 2),
+                         heights = unit(c(1, 2),
+                                        c('in'))) + 
+  plot_annotation(tag_levels = 'a') &
+      theme(text = element_text(size = 8, family = "Times"),
+            plot.margin = unit(c(0.01,0.01,0.01,0.01), "cm"))
 
-ggsave("../result/Fig2/Fig2.tiff",
-              width = 3,
-              height = 4,
-              units = "in",
-              dpi = 1000)
+ggsave("../result/Fig2/Fig2-flipped.tiff",
+       width = 6,
+       height = 4,
+       units = "in",
+       dpi = 1000)
 
 ############# Legend details ###################################################
 #chsqr

@@ -77,7 +77,7 @@ Fig5 <- ggplot(Fig5data,
     inherit.aes = FALSE, 
     vjust = 0,       
     hjust = -0.5,
-    size = 2,
+    size = 3,
     family = "Times") +
   geom_bracket(
     data = bracket_data,
@@ -85,7 +85,7 @@ Fig5 <- ggplot(Fig5data,
       xmax = xmax,
       y.position = y.position,
       label = label),
-    label.size = 2,
+    label.size = 3,
     family = "Times",
     inherit.aes = FALSE,
     tip.length = 0.015,
@@ -108,31 +108,35 @@ Fig5 <- ggplot(Fig5data,
   xlab("") +
   coord_flip() + 
   theme_bw() +
-  theme(text = element_text(size = 7, family = "Times"),
-        axis.text  = element_text(size = 7, family = "Times"),
+  theme(text = element_text(size = 8, family = "Times"),
+        axis.text  = element_text(size = 8, family = "Times"),
         axis.text.y = element_text(hjust = 1),
+        legend.text = element_text(size = 8, family = "Times"),
         legend.key.size = unit(0.2, "cm"),
         legend.title    = element_blank(),
         legend.position = "inside",
-        legend.position.inside = c(0.9, 0.03),
+        legend.position.inside = c(0.85, 0.04),
         legend.spacing.y = unit(0.05, "cm"),
-        legend.margin = margin(t = 0.01,
-                               r = 0.01,
-                               b = 0.01,
-                               l = 0.01,
-                               unit = "cm"),
-        legend.background = element_rect(fill="white",
-                                         size=0.1, linetype="solid", 
-                                         colour ="black")) +
+                  legend.margin = margin(t    = 0.01,
+                                         r    = 0.01,
+                                         b    = 0.01,
+                                         l    = 0.01,
+                                         unit = "cm"),
+              legend.background = element_rect(fill     = "white",
+                                               size     = 0.1,
+                                               linetype = "solid", 
+                                               colour   = "black"),
+        plot.margin = grid::unit(c(0.1, 0.1, 0.1, 0.1), "mm")) +
   ylim(c(0, 45)) 
+
 
 ############# Layout ###########################################################
 Fig5 
 ggsave("../result/Fig5/Fig5.tiff",
-       width = 3,
+       width  = 3,
        height = 3.3,
-       units = "in",
-       dpi = 1000)
+       units  = "in",
+       dpi    = 1000)
 
 ############# Legend details ###################################################
 
