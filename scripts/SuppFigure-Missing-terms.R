@@ -8,6 +8,11 @@ mhtp <-
   read_excel("../input/Missing_HPO_Terms_Proposal_LC_paper.xlsx", 
              sheet = "parents")
 
+# missing terms categorised
+# terms      codes Granuloma-related?
+graTerms <- 
+  fread("../input/missing-code-categorised_LC.csv")
+
 
 ############# Suppl Table New terms DAG ####################################
 ############## creating new HPO codes
@@ -174,14 +179,43 @@ jpeg("../result/SI/missing_terms_dag.jpeg",
      width = 2200,
      height = 1400)
 
-# # specify the exact set of terms to appear in the plot
-# terms_to_plot <- unique(c(missing_HPO_codes,
-#                           unlist(missing_HPO_parents),
-#                           unlist(missing_HPO_children)))
-# terms_to_plot <- unique(c(missing_HPO_codes,
-#                           unlist(missing_HPO_parents)))
 terms_to_plot <- remove_links(hpo2, unique(c(missing_HPO_codes, 
                    get_ancestors(hpo2, missing_HPO_codes))))
+# Character vector of colours 
+colours_for_terms <- ifelse(terms_to_plot %in% missing_HPO_codes,
+                            "#af8dc3","powderblue")
+
+
+
+onto_plot(
+  # ontology_index object
+  ontology = hpo2,
+  # specify the exact set of terms to appear in the plot
+  terms = terms_to_plot,
+  # Character vector of colours 
+  fillcolor = colours_for_terms,
+  # Numeric vector of term frequencies named by term IDs
+  frequencies = get_term_frequencies(hpo2,
+                                     missing_HPO_codes), 
+  # List of character vectors of ontological term IDs
+  term_sets = missing_HPO_codes,
+  fontsize = 30)
+
+dev.off()
+
+
+# plot 2: plot granuloma missing terms
+# HP:0032252 Granuloma
+graCodes <- graTerms$codes[graTerms$`Granuloma-related?` == 1]
+
+tiff("../result/SI/missing_granuloma_terms_dag.tiff",
+     width  = 6,
+     height = 4,
+     units  = "in",
+     res    = 1000)
+
+terms_to_plot <- remove_links(hpo2, unique(c(graCodes, 
+                                             get_ancestors(hpo2, graCodes))))
 # Character vector of colours 
 colours_for_terms <- ifelse(terms_to_plot %in% missing_HPO_codes,
                             "#af8dc3","powderblue")

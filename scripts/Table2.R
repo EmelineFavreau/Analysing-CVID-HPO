@@ -23,6 +23,9 @@ pp <-
   read_excel("../input/Genotype_Final.xlsx", 
              sheet = "Summary", range = "D1:D26")
 
+# Each row describes a patient, gene, variant, protein
+pgvp <- read_excel("../input/Table_3_genetics.xlsx")
+
 ############# tidy ############################################################
 trp <- trp[trp$TNFRsf13B_rare %in% nbr$STUDY_ID,]
 tcp <- tcp[tcp$TNFRSF13B_canonical %in% nbr$STUDY_ID,]
@@ -71,11 +74,15 @@ for(g in 1:nrow(tt)){
   }
 } 
 
-tt <- tt %>% dplyr::select(-c(si))
+# Patient, sex
+# subset pgvp to tt patients
+pgvu <- pgvp[pgvp$Patient %in% tt$si, ]
+pgvu$sex <- tt$Sex[match(pgvu$Patient, tt$si)] 
+pgvf <- rbind(pgvu, c(tt$si[!tt$si %in% pgvu$Patient],
+          tt$Diagnosis_gene[!tt$si %in% pgvu$Patient], NA, NA,
+          tt$Sex[!tt$si %in% pgvu$Patient]))
+pgvf$Patient <- 1:nrow(pgvf)
 
-tt <- tt %>% dplyr::select(-c(Patient)) %>% 
-  group_by(Diagnosis_gene, Sex) %>% 
-  mutate(Patient_count = n()) %>% dplyr::distinct()
 
 ############# save all #########################################################
-fwrite(tt, "../result/Table2/Table2.csv")
+fwrite(pgvf, "../result/Table2/Table2.csv")
