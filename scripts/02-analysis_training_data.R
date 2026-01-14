@@ -272,7 +272,16 @@ au = "HP:0002960"
 aha = "HP:0001890"
 au_STUDY = names(term_sets)[sapply(term_sets, function(x) au %in% x)] 
 aha_STUDY = names(term_sets)[sapply(term_sets, function(x) aha %in% x)] 
-
+# investigating skews
+x=num_hpo_comp$before_after_similarity_value
+mean(x > 0.8) * 100 
+mean(x > 0.5) * 100 
+mean(x < 0.5) * 100 
+IQR(x) 
+mean(x) 
+summary(x[x < 0.5])
+num_hpo_comp[num_hpo_comp$before_after_similarity_value < 0.5,]
+num_hpo_comp[num_hpo_comp$before_after_similarity_value > 0.5,]
 
 ######## save all
 
