@@ -22,6 +22,7 @@ common.R: list all dependencies
 # For manuscript figures and tables:
 Figure1.R
 Figure2.R
+Figure3_prep.R
 Figure3.R
 Figure4.R
 Figure5.R

@@ -1,152 +1,134 @@
 ######################## source common libraries ###############################
 source("common.R")
+library(ggsignif)
+library(cluster)
+library(ggpubr)
+library(ggrepel)
+library(vegan)
+library(ggtext)
 
 ######################## import input ##########################################
+# import violin data
+similarity_df <- readRDS("similarity_df.RDS")
+annotations <- readRDS("annotations.RDS")
+pairwise_ks <- readRDS("pairwise_ks.RDS")
+y_positions <- readRDS("y_positions.RDS")
+pooled_label <- readRDS("pooled_label.RDS")
+infCompBetween <- readRDS("infCompBetween.RDS")
+group_order <- readRDS("group_order.RDS")
+step <- readRDS("step.RDS")
 
-# HPO categorised as lab or clinical, each term in 10 or more patients
-loc <- read.csv("../result/HPO_freq_name_labORclinical.csv")
+# import qq-plot data
+qq_df <- readRDS("qq_df.RDS")
 
-# load nbr
-nbr <- readRDS("../result/tidy_data")
+# import MDS data
+mds_df <- readRDS("mds_df.RDS")
+InfComp <- readRDS("InfComp.RDS")
 
-# load patient clusters 
-infection_cluster <- fread("../result/InfectionBronchiectasisPatients.csv")
-complex_cluster <- fread("../result/complexPatients.csv")
+############# plotting ###########################################################
 
-############# Fig3 ############################################################
-figname <- "Fig3"
-fn <- "clinical"
+# Plot violin
+Fig3a <- ggplot(similarity_df,
+              aes(x = Group, y = Similarity, fill = Group)) +
+  geom_violin(alpha = 0.5, trim = FALSE) +
+  geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
+  ggsignif::geom_signif(
+    comparisons = annotations,
+    annotations = pairwise_ks$label,
+    y_position  = y_positions,
+    tip_length  = 0.01,
+    textsize    = 2.5,
+    family      = "Times",
+    vjust       = -0.2,
+    parse = FALSE
+  ) +
+  labs(
+    x       = "",
+    y       = "Pairwise Lin's Similarity",
+    caption = pooled_label
+  ) +
+  scale_fill_manual(values = infCompBetween) +
+  scale_x_discrete(limits = group_order) +
+  coord_cartesian(clip = "off") +
+  expand_limits(y = max(y_positions) + step) +
+  theme(
+    text            = element_text(size = 8, family = "Times"),
+    axis.text       = element_text(size = 8),
+    legend.position = "none",
+    plot.margin     = margin(t = 20, r = 5, b = 5, l = 5),
+    plot.caption    = ggtext::element_markdown(size = 7, family = "Times",
+                                               hjust = 0, face = "italic")
+  )
 
-# keep infection/complex patients
-data <- nbr %>% 
-  dplyr::filter(STUDY_ID %in% c(infection_cluster$infectionBronchiectasis, 
-                               complex_cluster$complexPatients)) 
-
-loc25 <- loc %>% dplyr::filter(HPO_freq > 25)
-
-# keep HPO categorised as lab or clinical, each term in 25 or more patients
-data$hpo <- sapply(data$hpo, function(x) x[x %in% loc25$HPO_code])
-
-data$hpo_long <- sapply(data$hpo,
-                     function(y) hpo$name[match(unlist(y), names(hpo$name))])
-
-hpo_long <- unlist(data$hpo_long)
-
-unique_long <- unique(hpo_long)
-
-## create a matching patient id vector
-patient <- rep(data$STUDY_ID, 
-               sapply(data$hpo, length))
-
-## make empty matrix - default value is 0
-patient_hpo_mat <- matrix(data = 0,
-                          nrow = length(loc25$HPO_code),
-                          ncol = nrow(data),
-                          dimnames = list(unique_long, data$STUDY_ID))
-
-## add 1 where the term matches a patient
-patient_hpo_mat[cbind(hpo_long, patient)] <- 1
-wide_df <- as.data.frame(patient_hpo_mat)
-
-# Assign HPO to Category
-LabClinical_info <- data.frame(HPO_term = rownames(patient_hpo_mat),
-   LabClinical = loc25$Category[match(rownames(patient_hpo_mat),
-                                      loc25$HPO_name)])
-
-# Assign Patient to cluster
-InfectionComplex_info <- data.frame(Patient = colnames(patient_hpo_mat),
-  InfectionComplex = ifelse(colnames(patient_hpo_mat) %in%
-                              infection_cluster$infectionBronchiectasis,
-                            "InfectionBronchiectasis",
-                            "Complex"))
-
-# order HPO by patient count 
-HPO_order <- rownames(wide_df)[order(rowSums(wide_df))]
-
-# make a long df: HPO_code,HPO_term,Patient,Presence,InfectionComplex,LabClinical
-final_long_df <- wide_df %>%
-  rownames_to_column(var = "HPO_term") %>%
-  pivot_longer(
-    cols = -HPO_term,
-    names_to = "Patient",
-    values_to = "Presence") %>%
-  left_join(LabClinical_info, by = "HPO_term") %>%
-  left_join(InfectionComplex_info, by = "Patient") %>% 
-  mutate(HPO_term = factor(HPO_term, levels = HPO_order)) %>%
-  dplyr::filter(LabClinical == fn)
+# qq plot
+Fig3b <- ggplot(qq_df, aes(x = x, y = y)) +
+  geom_point(alpha = 0.5, size = 0.8) +
+  geom_abline(intercept = 0, slope = 1, colour = "grey", linewidth = 0.5) +
+  labs(
+    x = "Between-Groups patient pairwise similarity Quantiles",
+    y = "Pooled patient pairwise similarity Quantiles"
+  ) +
+  #xlim(0.2, 1)+ylim(0.2,1)+
+  theme_classic() +
+  theme(text = element_text(size = 8, family = "Times"))
 
 
-p_main <- final_long_df %>%
-  ggplot(aes(x = HPO_term,
-                     y = Patient,
-                     fill = as.factor(Presence))) +
-  geom_tile(color = "white") +
-  facet_grid( . ~ InfectionComplex, 
-            scales = "free", 
-            space = "free") +
-  scale_fill_manual(values = presAbsvalues,
-                    labels = c("Absent", "Present"),
-                    name = "") +
-  theme(panel.grid       = element_blank(),
-        axis.text.x      = element_blank(), 
-        axis.ticks.x     = element_blank(),
-        strip.background = element_rect(fill = "grey85", color = NA),
-        strip.text       = element_text(size = 6, family = "Times"),
-        legend.position = c(-0.8, 0.05),
-        legend.text = element_text(size = 8, family = "Times"),
-        #legend.box.margin = unit(c(-10, 0, 0, 0), "pt"),
-        text             = element_text(size = 8, family = "Times"),
-        axis.text        = element_text(size = 8, family = "Times"),
-        legend.key.size  = unit(0.2, "cm"),
-        legend.margin = margin(t = 0.01, r = 0.1, b = 0.1, l = 0.1, unit = "mm"),
-        plot.margin = grid::unit(c(0.1, 0.1, 0.1, 0.1), "mm")) +
-  labs(x = "", y = "Patient") + 
-  coord_flip()
 
+# plot MDS colour-coded by groups
+Fig3c <- ggscatter(mds_df, x = "V1", y = "V2",
+                      color = "groups",
+                      palette = InfComp,
+                      size = 1,
+                      ellipse = TRUE,
+                      ellipse.type = "convex",
+                      mean.point = TRUE,
+                      mean.point.size = 5,
+                      shape = "groups",
+                      xlab = "MDS Dimension 1",
+                      ylab = "MDS Dimension 2") + 
+  theme_classic() +
+  theme(legend.title = element_blank(),
+        legend.position = c(0.9,0.9)) +
+  theme(text = element_text(size = 8, family = "Times")) 
 
-plot_data_right <- final_long_df %>%
-  dplyr::filter(Presence == 1) %>%
-  group_by(HPO_term) %>%
-  summarise(Count = n(), .groups = "drop")
-
-
-p_right <- ggplot(plot_data_right, 
-                  aes(x = HPO_term, y = Count)) +
-  geom_bar(stat = "identity",
-           fill = "grey50",
-           show.legend = FALSE) +
-  coord_flip() + 
-  labs(x = "", y = "Total Count") +
-  scale_y_continuous(breaks = c(0, 100, 200))+
-  theme_minimal() + 
-  theme(panel.grid         = element_blank(),
-        strip.text.y       = element_blank(), 
-        strip.background   = element_blank(),
-        axis.text.y        = element_blank(),
-        axis.ticks.y       = element_blank(),
-        panel.grid.major.x = element_line(color = "lightgrey",
-                                         linewidth = 0.2,
-                                         linetype = 2),
-        text               = element_text(size = 8, family = "Times"),
-        axis.text          = element_text(size = 7, family = "Times"),
-        plot.margin = grid::unit(c(0.1, 0.1, 0.1, 0.1), "mm"))
-
-
-Fig3 <- p_main + p_right +
-  plot_layout(widths = c(5, 1)) &
-  theme(plot.margin = unit(c(0, 0, 0, 0), "pt"))
-
+# plot MDS colour-coded by centres
+Fig3d <- ggscatter(mds_df, x = "V1", y = "V2",
+                   color = "centres",
+                   palette = centrescol,
+                   size = 2,
+                   shape = "centres",
+                   xlab = "MDS Dimension 1",
+                   ylab = "MDS Dimension 2") + 
+  scale_shape_manual(values = c(1:11)) +
+  theme_classic() +
+  theme(legend.title = element_blank()) +
+  theme(text = element_text(size = 8, family = "Times")) +
+  guides(color = guide_legend(ncol = 1),
+         shape = guide_legend(ncol = 1))
 
 ############# Layout ###########################################################
-Fig3
-ggsave(paste("../result/", figname, "/", figname, ".tiff", sep = ""),
-              width = 6,
-              height = 4,
-              units = "in",
-              dpi = 1000)
+top <- Fig3a + Fig3b
+bottom <-Fig3c + Fig3d 
+top / bottom + 
+  plot_annotation(tag_levels = 'a') +
+  plot_layout(
+    guides = 'collect'
+  ) 
+
+
+ggsave("../result/Figure3.tiff",
+       width  = 8.5,
+       height = 6,
+       units  = "in",
+       dpi    = 1000)
+
+ggsave("../result/Figure3.jpeg",
+       width  = 8.5,
+       height = 6,
+       units  = "in",
+       dpi    = 1000)
 
 ############# Legend details ###################################################
-# number of patients
-nrow(data)
-# number of HPO
-length(HPO_order)
+similarity_df %>% 
+  group_by(Group) %>% 
+  dplyr::summarise(mean = mean(Similarity), n = n())
