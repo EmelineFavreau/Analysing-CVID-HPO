@@ -29,6 +29,7 @@ Figure6_prep.R
 Figure6_generate-embedding.txt
 create_embedding.py
 Figure6.R
+FigE4.R
 SuppFigure-Missing-terms.R
 SuppTable-complete-HPO-list.R
 Table2.R
