@@ -277,7 +277,7 @@ ggsave("../result/Figure4.tiff",
        dpi    = 1000,
        bg     = "white") # the annotation background is white
 
-ggsave("../result/Figure4.jpeg",
+ggsave("../result/Figure4.hamming.jpeg",
        width  = 10,
        height = 6,
        units  = "in",
