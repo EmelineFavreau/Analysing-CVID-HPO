@@ -25,14 +25,19 @@ d3 <- readRDS("../result/tidy_data")
 # remove incomplete data
 training <- training[!is.na(training$HPO_CODE),]
 
-# keep records of the same patient
-training <- training[grep(pattern = ".*atient1.*", x = training$STUDY_ID),]
-training <- training[grep(pattern = ".*1E|.*1n|.*1o", x = training$STUDY_ID,
-                          invert = T),]
-
 # vector of anonymised names of same patient
-patient1_vec <- training$STUDY_ID[grep(pattern = ".*atient1.*",
-                                       x = training$STUDY_ID)]
+patient1_vec <- c("test1",
+                  "Patient1C",
+                  "Patient1A",
+                  "Patient1D",
+                  "Patient1G",
+                  "Patient1I",
+                  "Patient1v",
+                  "patient1t",
+                  "patient1u",
+                  "Patient1q") 
+# keep records of the same patient
+training <- training[training$STUDY_ID %in% patient1_vec,]
 
 # anonymise the clinicians
 training$ClinicianAnon <- 1:10
@@ -136,7 +141,9 @@ after_training <- d3f[!is.na(d3f$hpo), ]
 # for each study_id, calculate number of HPO before and after training
 num_hpo_comp <- data.frame(STUDY_ID = after_training$STUDY_ID,
                            num_hpo_before = NA,
-                           num_hpo_after = NA)
+                           num_hpo_after = NA,
+                           ms_num_hpo_before = NA,
+                           ms_num_hpo_after = NA)
 
 # calculate number of HPO before and after
 for(i in 1:nrow(after_training)){
@@ -147,18 +154,30 @@ for(i in 1:nrow(after_training)){
   num_hpo_comp[i, 2:3] <- c(num_hpo_before, num_hpo_after)
 }
 
+# calculate number of HPO before and after (ms=minimal set)
+for(i in 1:nrow(after_training)){
+  p <- after_training$STUDY_ID[i]
+  ms_num_hpo_after <- length(minimal_set(hpo, unlist(after_training$hpo[i])))
+  hpo_before <- strsplit(
+    before_training$HPO_CODE[before_training$STUDY_ID == p], split = "; ")
+  ms_num_hpo_before <- length(minimal_set(hpo, unlist(hpo_before)))
+  num_hpo_comp[i, 4:5] <- c(ms_num_hpo_before, ms_num_hpo_after)
+}
+
 #### task 3: plot distribution
 # transform out data into long
 num_hpo_compL <- pivot_longer(data = num_hpo_comp, 
-                              cols = c("num_hpo_before" , "num_hpo_after" ),
+                              cols = c("ms_num_hpo_before" , "ms_num_hpo_after" ),
                               names_to = "Timepoint",
                               values_to = "Records",
-                              names_prefix ="num_hpo_")
+                              names_prefix ="ms_num_hpo_")
 
 # assessing if distributions are drawn from same continuous 
-after_record_vec <- num_hpo_compL %>% dplyr::filter(Timepoint == "after") %>% 
+after_record_vec <- num_hpo_compL %>%
+  dplyr::filter(Timepoint == "after") %>% 
   dplyr::select(Records) %>% unlist() 
-before_record_vec <- num_hpo_compL %>% dplyr::filter(Timepoint == "before") %>% 
+before_record_vec <- num_hpo_compL %>% 
+  dplyr::filter(Timepoint == "before") %>% 
   dplyr::select(Records) %>% unlist() 
 ks.test(before_record_vec, after_record_vec) # p-value < 2.2e-16
 
@@ -204,20 +223,20 @@ term_sets <- lapply(term_sets,
                     function(x) minimal_set(hpo, x))
 
 # step 4.3: Calculate similarity matrix
-sim_mat <- get_sim_grid(ontology = hpo,
+sim_matba <- get_sim_grid(ontology = hpo,
                         term_sets = term_sets)
 
 # extract the similarity value before and after for a given STUDY_ID
 # every other row, starting from 2 (even)
-important_rows <- seq(from = 2, to = nrow(sim_mat), by = 2)
+important_rows <- seq(from = 2, to = nrow(sim_matba), by = 2)
 
 # every other column, starting from 1 (odds)
-important_cols <- seq(from = 1, to = nrow(sim_mat), by = 2)
+important_cols <- seq(from = 1, to = nrow(sim_matba), by = 2)
 
 # for a given STUDY_ID, get the similarity of HPO before and after training
 similarity_value_vec <- c()
 for(i in 1:length(common_STUDY_ID_vec)){
-  before_after_sim <- sim_mat[important_rows[i], important_cols[i]]
+  before_after_sim <- sim_matba[important_rows[i], important_cols[i]]
   similarity_value_vec <- c(similarity_value_vec, before_after_sim)
 }
 
@@ -225,8 +244,8 @@ for(i in 1:length(common_STUDY_ID_vec)){
 names(similarity_value_vec) <- common_STUDY_ID_vec
 
 # step 4.4: calculate difference of number of HPO before and after training 
-num_hpo_comp$differential <- num_hpo_comp$num_hpo_after - 
-  num_hpo_comp$num_hpo_before
+num_hpo_comp$differential_ms <- num_hpo_comp$ms_num_hpo_after - 
+  num_hpo_comp$ms_num_hpo_before
 
 # combine results
 index <- match(num_hpo_comp$STUDY_ID, common_STUDY_ID_vec)
@@ -268,28 +287,12 @@ for(tt in seq(1, length(term_sets), by = 2)){
 }
 
 
-au = "HP:0002960"
-aha = "HP:0001890"
-au_STUDY = names(term_sets)[sapply(term_sets, function(x) au %in% x)] 
-aha_STUDY = names(term_sets)[sapply(term_sets, function(x) aha %in% x)] 
-# investigating skews
-x=num_hpo_comp$before_after_similarity_value
-mean(x > 0.8) * 100 
-mean(x > 0.5) * 100 
-mean(x < 0.5) * 100 
-IQR(x) 
-mean(x) 
-summary(x[x < 0.5])
-num_hpo_comp[num_hpo_comp$before_after_similarity_value < 0.5,]
-num_hpo_comp[num_hpo_comp$before_after_similarity_value > 0.5,]
-
 ######## save all
 
 
 nrow(num_hpo_comp)# for main text
-sum(num_hpo_comp$differential < 0)# for main text
-summary(num_hpo_comp$differential[num_hpo_comp$differential >0])# for main text
+sum(num_hpo_comp$differential_ms < 0)# for main text
+summary(num_hpo_comp$differential_ms[num_hpo_comp$differential_ms >0])# for main text
 fwrite(sim_mat, "../result/Fig1/sim_mat.csv")
 fwrite(num_hpo_compL, "../result/Fig1/num_hpo_compL.csv")
 fwrite(num_hpo_comp, "../result/Fig1/num_hpo_comp.csv")
-
