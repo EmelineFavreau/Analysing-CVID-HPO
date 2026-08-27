@@ -26,10 +26,6 @@ Figure3_prep.R
 Figure3.R
 Figure4.R
 Figure5.R
-Figure6_prep.R
-Figure6_generate-embedding.txt
-create_embedding.py
-Figure6.R
 FigE3_prep.R
 FigE3.R
 FigE4.R
