@@ -124,7 +124,6 @@ D <- as.dist(1-tji)
 
 # hierarchical clustering using Ward's minimum variance method
 thc <- hclust(D, method = "ward.D2")
-#thc <- hclust(D, method = "average")
 
 # counts how many patients share each pair of phenotypes
 numer <- t(newz) %*% newz
@@ -140,7 +139,6 @@ D <- as.dist(1 - pji)
 
 # hierarchical clustering using Ward's minimum variance method
 phc <- hclust(D, method = "ward.D2")
-#phc <- hclust(D, method = "average")
 
 
 # list of patients for each HPO group:
