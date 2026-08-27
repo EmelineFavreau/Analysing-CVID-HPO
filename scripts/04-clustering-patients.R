@@ -110,6 +110,37 @@ rownames(newz) <- names(keys)
 # to construct distances between them
 newz <- newz[, colSums(newz)>0]
 
+# matrix of pairwise phenotype counts of patients
+numer <- newz %*% t(newz)
+
+# union of phenotype counts per patient pair (|A| + |B| - |A∩B|)
+denom <- outer(rowSums(newz), rowSums(newz), "+") - numer
+
+# Jaccard similarity
+tji <- numer/(denom)
+
+# convert similarity to distance (0 = identical, 1 = no overlap)
+D <- as.dist(1-tji)
+
+# hierarchical clustering using Ward's minimum variance method
+thc <- hclust(D, method = "ward.D2")
+
+# counts how many patients share each pair of phenotypes
+numer <- t(newz) %*% newz
+
+# union of phenotype counts per patient pair (|A| + |B| - |A∩B|)
+denom <- outer(colSums(newz), colSums(newz), "+") - numer
+
+# Jaccard similarity
+pji <- numer/(denom)
+
+# convert phenotype similarity to distance
+D <- as.dist(1 - pji)
+
+# hierarchical clustering using Ward's minimum variance method
+phc <- hclust(D, method = "ward.D2")
+
+
 # list of patients for each HPO group:
 key_vec <- c("infection",
              "bronchiectasis",
@@ -168,3 +199,8 @@ fwrite(as.data.frame(infectionBronchiectasis),
 fwrite(as.data.frame(complexPatients),
        "../result/complexPatients.csv")
 fwrite(cluster_num_perc, "../result/main/cluster_num_perc.csv")
+
+# save patient/phenotype matrix, hierarchical clusters (for Fig4)
+saveRDS(newz, "../result/newz.RDS")
+saveRDS(thc, "../result/thc.RDS")
+saveRDS(phc, "../result/phc.RDS")

@@ -79,7 +79,7 @@ Fig1B <- ggplot(num_hpo_compL,
 
 Fig1C <- ggplot(num_hpo_comp,
                 aes(x = before_after_similarity_value,
-                    y = differential)) +
+                    y = differential_ms)) +
   geom_point(size = 0.3) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
   geom_vline(xintercept = 0.5, linetype = "dashed", color = "grey40") +
@@ -89,7 +89,7 @@ Fig1C <- ggplot(num_hpo_comp,
   geom_density_2d_filled(alpha = 0.5) +
   scale_x_continuous(breaks = c(0.25, 0.5, 0.75, 1),
                      limits = c(0.2, 1.1)) + 
-  ylim(c(-20, 33)) + 
+  ylim(c(-10, 33)) + 
   theme(text = element_text(size = 8, family = "Times"),
         axis.text = element_text(size = 8),
         legend.position = "none")
@@ -119,4 +119,7 @@ ggsave("../result/Fig1/Fig1.tiff",
 
 ############# Legend details ###################################################
 summary(num_hpo_compL$Records[num_hpo_compL$Timepoint == "Post-Training"])
-IQR(num_hpo_compL$Records[num_hpo_compL$Timepoint == "Post-Training"])
+#Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#2.00   12.00   18.00   17.25   23.00   32.00 
+IQR(num_hpo_compL$Records[num_hpo_compL$Timepoint == "Post-Training"]) # 11
+

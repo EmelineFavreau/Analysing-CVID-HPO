@@ -13,11 +13,14 @@ cr <- fread( "../result/cluster_biomarker_tests_ratio_pvalue.csv")
 
 ############# Fig5 ############################################################
 
-
-cr <- cr %>% dplyr::filter(biological_measure %in% c("smb",
+# focus on categories
+cr <- cr %>% 
+  dplyr::select(-biological_measure) %>% 
+  dplyr::filter(biological_category %in% c("smb",
                                                "cd21",
                                                "NFKB1",
-                                               "anyPathogenic"))
+                                               "anyPathogenic")) %>%
+  dplyr::rename(biological_measure = biological_category)
 
 # filter for the significant associations only
 # smb, cd21, NFKB1, anyPathogenic
@@ -63,7 +66,6 @@ bracket_data <- data.frame(
 )
 
 
-
 Fig5 <- ggplot(Fig5data,
        aes(fill = cluster,
            y = cluster_proportion,
@@ -95,13 +97,13 @@ Fig5 <- ggplot(Fig5data,
   scale_x_discrete(labels = c("SmB+" = "smB+" ,
                               "SmB-" = "smB-",
                               "CD21low high" = expression("CD21"^lo),
-                              "CD21low normal" = expression("CD211"^norm),
+                              "CD21low normal" = expression("CD21"^norm),
                               "NFKB1" = "NFKB1",
                               "any Pathogenic" = "Any Pathogenic Variant",
                               "SmB+" = "smB+",
                               "SmB-"  = "smB-" ,
                               "CD21low high" = expression("CD21"^lo),
-                              "CD21low normal" = expression("CD211"^norm),
+                              "CD21low normal" = expression("CD21"^norm),
                               "NFKB1" = "NFKB1",
                               "any Pathogenic" = "         Any\nPathogenic\n    Variant")) +
   ylab("Proportion of patients within the cluster") +
@@ -133,7 +135,7 @@ Fig5 <- ggplot(Fig5data,
 ############# Layout ###########################################################
 Fig5 
 ggsave("../result/Fig5/Fig5.tiff",
-       width  = 3,
+       width  = 3.3,
        height = 3.3,
        units  = "in",
        dpi    = 1000)
